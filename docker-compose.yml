@@ -1,0 +1,6 @@
+services:
+  uttambsolutionslimitedstaffs:
+    image: ${DOCKER_REGISTRY-}uttambsolutionslimitedstaffs
+    build:
+      context: Uttambsolutionslimitedstaffs
+      dockerfile: Dockerfile
