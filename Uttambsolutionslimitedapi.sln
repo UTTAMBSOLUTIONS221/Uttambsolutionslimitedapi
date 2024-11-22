@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uttambsolutionslimitedapiga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uttambsolutionslimitedcustomers", "Uttambsolutionslimitedcustomers\Uttambsolutionslimitedcustomers.csproj", "{24AED423-9699-4604-9BA4-0FA641997216}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "uttambsolutionslimitedweb", "Uttambsolutionslimitedweb\uttambsolutionslimitedweb.esproj", "{92988A5A-B8D2-48CA-9766-C29C52143C8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,12 @@ Global
 		{24AED423-9699-4604-9BA4-0FA641997216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24AED423-9699-4604-9BA4-0FA641997216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24AED423-9699-4604-9BA4-0FA641997216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +52,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{45BF904C-8E4C-4323-892A-60DFFB9FD4E7} = {AA6245E6-D216-42D5-A61D-BAD17F17342C}
 		{24AED423-9699-4604-9BA4-0FA641997216} = {AA6245E6-D216-42D5-A61D-BAD17F17342C}
+		{92988A5A-B8D2-48CA-9766-C29C52143C8D} = {6664CBDB-E19D-458A-B83C-769C380BB69C}
 	EndGlobalSection
 EndGlobal
