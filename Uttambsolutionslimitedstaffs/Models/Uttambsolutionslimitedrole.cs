@@ -20,6 +20,5 @@ namespace Uttambsolutionslimitedstaffs.Models
         public bool Isdeleted { get; set; }
         [Column("Isdefault")]
         public bool Isdefault { get; set; }
-        public List<Uttambsolutionslimitedpermission>? Permissions { get; set; }
     }
 }
