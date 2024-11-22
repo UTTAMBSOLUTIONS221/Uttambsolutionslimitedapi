@@ -1,13 +1,52 @@
+networks:
+  backend:
+    driver: bridge
+  frontend:
+    driver: bridge  # Explicitly define 'frontend' as a bridge network
+
+volumes:
+  sql_staff_data:
+
 services:
+  # Staff Database 
+  uttambsolutionsstaffdatabase:
+     container_name: uttamb_solutions_limited_staff_database
+     image: mcr.microsoft.com/mssql/server:2022-latest
+     environment:
+        - ACCEPT_EULA=Y
+        - SA_PASSWORD=Password123!
+     ports:
+        - "18001:1433"
+     volumes:
+        - sql_staff_data:/var/opt/mssql  # Persistent volume
+     networks:
+        - backend
+     restart: always  # Automatically restart container on failure
+  
   uttambsolutionslimitedstaffs:
+    container_name: uttamb_solutions_limited_staffs
     image: ${DOCKER_REGISTRY-}uttambsolutionslimitedstaffs
     build:
       context: Uttambsolutionslimitedstaffs
       dockerfile: Dockerfile
+    networks:
+       - backend
+    environment:
+      - DB_HOST=uttambsolutionsstaffdatabase
+      - DB_NAME=Uttambsolutionsstaffdb
+      - DB_SA_USERNAME=sa
+      - DB_SA_PASSWORD=Password123!
 
   uttambsolutionslimitedcustomers:
     image: ${DOCKER_REGISTRY-}uttambsolutionslimitedcustomers
     build:
       context: Uttambsolutionslimitedcustomers
+      dockerfile: Dockerfile
+
+
+  uttambsolutionslimitedapigateway:
+    image: ${DOCKER_REGISTRY-}uttambsolutionslimitedapigateway
+    build:
+      context: Uttambsolutionslimitedapigateway
       dockerfile: Dockerfile
 

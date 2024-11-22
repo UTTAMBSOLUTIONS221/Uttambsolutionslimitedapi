@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "uttambsolutionslimitedstaffs": "StartDebugging",
-        "uttambsolutionslimitedcustomers": "StartDebugging"
+        "uttambsolutionslimitedcustomers": "StartDebugging",
+        "uttambsolutionslimitedapigateway": "StartDebugging"
       }
     }
   }

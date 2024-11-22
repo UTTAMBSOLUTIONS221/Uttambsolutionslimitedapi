@@ -1,8 +1,6 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
-//builder.Services.AddSwaggerGen();
 
 // Add CORS services
 builder.Services.AddCors(options =>
@@ -21,8 +19,6 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
     .AddEnvironmentVariables();
 builder.Services.AddOcelot(builder.Configuration);
 var app = builder.Build();
-//app.UseSwagger();
-//app.UseSwaggerUI();
 
 // Use Ocelot
 app.UseRouting();
