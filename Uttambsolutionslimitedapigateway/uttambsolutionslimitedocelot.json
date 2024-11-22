@@ -1,0 +1,97 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/api/Staffauth/Staffauthenticate",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "uttambsolutionsstaff",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Staffauth/Staffauthenticate"
+    },
+    //Staff Permissions
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedpermission",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedpermission"
+    },
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedpermission/{Permissionid}",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedpermission/{Permissionid}"
+    },
+    //Staff Roles
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedrole",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "Uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedrole"
+    },
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedrole/{Roleid}",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "Uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedrole/{Roleid}"
+    },
+    //Staffs
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedstaff",
+      "UpstreamHttpMethod": [ "GET","POST","PUT"],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "Uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedstaff"
+    },
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedstaff/{Staffid}",
+      "UpstreamHttpMethod": [ "GET","DELETE" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "Uttambsolutionslimitedstaffs",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedstaff/{Staffid}"
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "http://localhost:8002", // Your Ocelot Gateway URL
+    "CorsOrigins": [ "http://localhost:3000" ], // CORS origins from React App
+    "AllowAnyMethod": true,
+    "AllowAnyHeader": true
+  }
+}
