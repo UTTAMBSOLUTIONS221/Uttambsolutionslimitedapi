@@ -24,8 +24,8 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpGet("{Staffid:int}")]
         public async Task<ActionResult<Uttambsolutionslimitedstaff>> GetById(int Staffid)
         {
-            var customer = await _staffDbContext.Uttambsolutionslimitedstaffs.FindAsync(Staffid);
-            return customer;
+            var staff = await _staffDbContext.Uttambsolutionslimitedstaffs.FindAsync(Staffid);
+            return staff;
         }
 
         [HttpPost]

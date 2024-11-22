@@ -24,8 +24,8 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpGet("{Permissionid:int}")]
         public async Task<ActionResult<Uttambsolutionslimitedpermission>> GetById(int Permissionid)
         {
-            var customer = await _permissionDbContext.Uttambsolutionslimitedpermissions.FindAsync(Permissionid);
-            return customer;
+            var permission = await _permissionDbContext.Uttambsolutionslimitedpermissions.FindAsync(Permissionid);
+            return permission;
         }
 
         [HttpPost]
@@ -47,8 +47,8 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpDelete("{Permissionid:int}")]
         public async Task<ActionResult> Delete(int Permissionid)
         {
-            var staff = await _permissionDbContext.Uttambsolutionslimitedpermissions.FindAsync(Permissionid);
-            _permissionDbContext.Uttambsolutionslimitedpermissions.Remove(staff);
+            var permission = await _permissionDbContext.Uttambsolutionslimitedpermissions.FindAsync(Permissionid);
+            _permissionDbContext.Uttambsolutionslimitedpermissions.Remove(permission);
             await _permissionDbContext.SaveChangesAsync();
             return Ok();
         }
