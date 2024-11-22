@@ -6,7 +6,8 @@
       "serviceActions": {
         "uttambsolutionslimitedstaffs": "StartDebugging",
         "uttambsolutionslimitedcustomers": "StartDebugging",
-        "uttambsolutionslimitedapigateway": "StartDebugging"
+        "uttambsolutionslimitedapigateway": "StartDebugging",
+        "blazorserverwebui": "StartDebugging"
       }
     }
   }

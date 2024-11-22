@@ -51,8 +51,20 @@ services:
       context: Uttambsolutionslimitedapigateway
       dockerfile: Dockerfile
     ports:
-      - 8002:8080
+      - 8001:8080
     networks:
        - backend
        - frontend
+
+
+  blazorserverwebui:
+    container_name: uttamb_solutions_limited_blazor_ui
+    image: ${DOCKER_REGISTRY-}blazorserverwebui
+    build:
+      context: BlazorServerWebUI
+      dockerfile: Dockerfile
+    ports:
+      - 8002:80
+    networks:
+      - frontend
 
