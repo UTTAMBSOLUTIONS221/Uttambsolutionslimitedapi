@@ -23,7 +23,7 @@ const SignIn = () => {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    const staffApiUrl = "http://localhost:8002/api/Staffauth/Staffauthenticate";
+    const staffApiUrl = "http://localhost:8001/api/Uttambsolutionslimitedstaff/Staffauthenticate";
     const customerApiUrl = "http://localhost:8002/customerlogin";
 
     try {
