@@ -1,171 +1,240 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  const handleSignUp = (e) => {
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!termsAccepted) {
-      console.log("You must accept the terms and services");
-      return;
-    }
-    if (password === confirmPassword) {
-      console.log("Signing up with", firstName, lastName, phoneNumber, email, password);
-    } else {
-      console.log("Passwords do not match");
+    const newErrors = validateForm();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    const registerApiUrl = "http://localhost:8001/api/Uttambsolutionslimitedstaff";
+    try {
+      const response = await fetch(registerApiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Registration failed.");
+      }
+
+      alert("Registration successful!");
+      navigate("/signin");
+    } catch (err) {
+      console.error("An error occurred during registration:", err.message);
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+    if (!formData.firstname) errors.firstname = "First name is required.";
+    if (!formData.lastname) errors.lastname = "Last name is required.";
+    if (!formData.email) {
+      errors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "Email is invalid.";
+    }
+    if (!formData.phone) errors.phone = "Phone number is required.";
+    if (!formData.password) {
+      errors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match.";
+    }
+    return errors;
+  };
+
   return (
-    <div
-      className="container d-flex align-items-center justify-content-center"
-      style={{
-        height: "85vh", // Increased height for a taller viewport
-      }}
-    >
-      <div
-        className="card shadow-lg p-5"
-        style={{
-          backgroundColor: "#fff",
-          maxWidth: "600px", // Increased max width
-          width: "100%",
-          borderRadius: "15px", // Rounded corners for a more modern look
-          padding: "40px", // Increased padding for larger spacing
-        }}
-      >
-        <h2 className="text-center fw-bold text-uppercase mb-5" style={{ color: "#0a506c", fontSize: "32px" }}>
-          Sign Up
-        </h2>
-        <form onSubmit={handleSignUp}>
-          {/* First Name and Last Name in One Row */}
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <label htmlFor="firstName" className="form-label" style={{ fontSize: "18px" }}>
-                First Name
-              </label>
-              <input
-                type="text"
-                className="form-control form-control-lg" // Use a larger input size
-                id="firstName"
-                placeholder="Enter first name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
+    <div>
+      <meta charSet="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>UTTAMB SOLUTIONS | SIGNUP</title>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+      />
+      <link href="/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
+      <link href="/dist/css/adminlte.min.css" rel="stylesheet" />
+      <div className="hold-transition login-page">
+        <div className="login-box">
+          <div className="card card-info card-outline">
+            <div className="card-body login-card-body">
+              <p className="login-box-msg font-weight-light text-dark text-uppercase font-weight-bold">
+                Sign up to join us
+              </p>
+              <form onSubmit={handleSubmit}>
+
+              <div className="row">
+                <div className="col-md-6">
+                  
+                {/* First Name */}
+                <div className="input-group mb-3">
+                  <input
+                    type="text"
+                    name="firstname"
+                    value={formData.firstname}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="First Name"
+                  />
+                  <div className="input-group-append">
+                    <div className="input-group-text">
+                      <span className="fa fa-user" />
+                    </div>
+                  </div>
+                </div>
+                {errors.firstname && (
+                  <span className="text-danger">{errors.firstname}</span>
+                )}
+                </div>
+                <div className="col-md-6">
+                   {/* Last Name */}
+                <div className="input-group mb-3">
+                  <input
+                    type="text"
+                    name="lastname"
+                    value={formData.lastname}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="Last Name"
+                  />
+                  <div className="input-group-append">
+                    <div className="input-group-text">
+                      <span className="fa fa-user" />
+                    </div>
+                  </div>
+                </div>
+                {errors.lastname && (
+                  <span className="text-danger">{errors.lastname}</span>
+                )}
+                </div>
+              </div>
+                {/* Email */}
+                <div className="input-group mb-3">
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="Email"
+                  />
+                  <div className="input-group-append">
+                    <div className="input-group-text">
+                      <span className="fa fa-envelope" />
+                    </div>
+                  </div>
+                </div>
+                {errors.email && (
+                  <span className="text-danger">{errors.email}</span>
+                )}
+
+                {/* Phone */}
+                <div className="input-group mb-3">
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="form-control"
+                    placeholder="Phone"
+                  />
+                  <div className="input-group-append">
+                    <div className="input-group-text">
+                      <span className="fa fa-phone" />
+                    </div>
+                  </div>
+                </div>
+                {errors.phone && (
+                  <span className="text-danger">{errors.phone}</span>
+                )}
+                  <div className="row">
+                  <div className="col-md-6">
+                    {/* Password */}
+                      <div className="input-group mb-3">
+                        <input
+                          type="password"
+                          name="password"
+                          value={formData.password}
+                          onChange={handleChange}
+                          className="form-control"
+                          placeholder="Password"
+                        />
+                        <div className="input-group-append">
+                          <div className="input-group-text">
+                            <span className="fa fa-lock" />
+                          </div>
+                        </div>
+                      </div>
+                      {errors.password && (
+                        <span className="text-danger">{errors.password}</span>
+                      )}
+                    </div>
+                    <div className="col-md-6">
+                      {/* Confirm Password */}
+                      <div className="input-group mb-3">
+                        <input
+                          type="password"
+                          name="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          className="form-control"
+                          placeholder="Confirm Password"
+                        />
+                        <div className="input-group-append">
+                          <div className="input-group-text">
+                            <span className="fa fa-lock" />
+                          </div>
+                        </div>
+                      </div>
+                      {errors.confirmPassword && (
+                        <span className="text-danger">{errors.confirmPassword}</span>
+                      )}
+                    </div>
+                  </div>
+
+                {/* Buttons */}
+                <div className="row">
+                  <div className="col-6">
+                    <a href="/" className="btn btn-danger btn-block">
+                      Cancel
+                    </a>
+                  </div>
+                  <div className="col-6">
+                    <button
+                      type="submit"
+                      className="btn btn-info btn-block"
+                    >
+                      Register
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
-            <div className="col-md-6">
-              <label htmlFor="lastName" className="form-label" style={{ fontSize: "18px" }}>
-                Last Name
-              </label>
-              <input
-                type="text"
-                className="form-control form-control-lg"
-                id="lastName"
-                placeholder="Enter last name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
           </div>
-
-          {/* Phone Number Field */}
-          <div className="mb-4">
-            <label htmlFor="phoneNumber" className="form-label" style={{ fontSize: "18px" }}>
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              className="form-control form-control-lg"
-              id="phoneNumber"
-              placeholder="Enter phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-          </div>
-
-          {/* Email Address Field */}
-          <div className="mb-4">
-            <label htmlFor="email" className="form-label" style={{ fontSize: "18px" }}>
-              Email address
-            </label>
-            <input
-              type="email"
-              className="form-control form-control-lg"
-              id="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          {/* Password and Confirm Password in One Row */}
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <label htmlFor="password" className="form-label" style={{ fontSize: "18px" }}>
-                Password
-              </label>
-              <input
-                type="password"
-                className="form-control form-control-lg"
-                id="password"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="confirmPassword" className="form-label" style={{ fontSize: "18px" }}>
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                className="form-control form-control-lg"
-                id="confirmPassword"
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Terms and Services Checkbox */}
-          <div className="mb-4 form-check">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="terms"
-              checked={termsAccepted}
-              onChange={(e) => setTermsAccepted(e.target.checked)}
-            />
-            <label className="form-check-label" htmlFor="terms" style={{ fontSize: "16px" }}>
-              I accept the{" "}
-              <Link to="/terms-and-services" style={{ color: "#0a506c", fontWeight: "bold" }}>
-                Terms and Services
-              </Link>
-            </label>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="btn btn-primary w-100 py-3"
-            style={{
-              backgroundColor: "#0a506c", // Brand color
-              color: "white",
-              fontWeight: "bold",
-              fontSize: "18px",
-              borderRadius: "10px", // Larger rounded corners
-            }}
-          >
-            Sign Up
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
