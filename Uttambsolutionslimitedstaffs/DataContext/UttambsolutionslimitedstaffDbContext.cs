@@ -23,7 +23,8 @@ namespace Uttambsolutionslimitedstaffs.DataContext
                 Console.WriteLine(ex.Message);
             }
         }
-
+        public DbSet<Uttambsolutionslimitedpermission> Uttambsolutionslimitedpermissions { get; set; }
+        public DbSet<Uttambsolutionslimitedrole> Uttambsolutionslimitedroles { get; set; }
         public DbSet<Uttambsolutionslimitedstaff> Uttambsolutionslimitedstaffs { get; set; }
     }
 }
