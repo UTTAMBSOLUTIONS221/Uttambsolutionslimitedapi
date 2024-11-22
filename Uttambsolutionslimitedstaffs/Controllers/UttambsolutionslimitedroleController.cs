@@ -8,9 +8,9 @@ namespace Uttambsolutionslimitedstaffs.Controllers
     [ApiController]
     public class UttambsolutionslimitedroleController : ControllerBase
     {
-        private readonly UttambsolutionslimitedroleDbContext _roleDbContext;
+        private readonly UttambsolutionslimitedstaffDbContext _roleDbContext;
 
-        public UttambsolutionslimitedroleController(UttambsolutionslimitedroleDbContext roleDbContext)
+        public UttambsolutionslimitedroleController(UttambsolutionslimitedstaffDbContext roleDbContext)
         {
             _roleDbContext = roleDbContext;
         }

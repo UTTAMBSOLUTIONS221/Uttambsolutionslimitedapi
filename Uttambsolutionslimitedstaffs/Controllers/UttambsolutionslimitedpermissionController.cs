@@ -8,9 +8,9 @@ namespace Uttambsolutionslimitedstaffs.Controllers
     [ApiController]
     public class UttambsolutionslimitedpermissionController : ControllerBase
     {
-        private readonly UttambsolutionslimitedpermissionDbContext _permissionDbContext;
+        private readonly UttambsolutionslimitedstaffDbContext _permissionDbContext;
 
-        public UttambsolutionslimitedpermissionController(UttambsolutionslimitedpermissionDbContext permissionDbContext)
+        public UttambsolutionslimitedpermissionController(UttambsolutionslimitedstaffDbContext permissionDbContext)
         {
             _permissionDbContext = permissionDbContext;
         }
