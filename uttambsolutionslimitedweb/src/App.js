@@ -18,21 +18,20 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public Routes with StartLayout */}
-          <Route element={<StartLayout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+          {/* Public Routes */}
+          <Route path="/" element={<StartLayout />}>
+            <Route index element={<Index />} />
           </Route>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
 
-          {/* Protected Routes with AdminLayout */}
+          {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
             <Route element={<AdminLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/profile" element={<Profile />} />
               <Route path="/dashboard/settings" element={<Settings />} />
               <Route path="/staffs" element={<Staffs />} />
-      
             </Route>
           </Route>
         </Routes>
