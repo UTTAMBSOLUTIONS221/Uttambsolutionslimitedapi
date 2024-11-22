@@ -12,7 +12,7 @@ var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var dbUsername = Environment.GetEnvironmentVariable("DB_SA_USERNAME");
 var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
-var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID={dbUsername};Password={dbPassword}";
+var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID={dbUsername};Password={dbPassword};Encrypt=True;TrustServerCertificate=True;";
 builder.Services.AddDbContext<UttambsolutionslimitedstaffDbContext>(opt => opt.UseSqlServer(connectionString));
 /* ===================================== */
 
