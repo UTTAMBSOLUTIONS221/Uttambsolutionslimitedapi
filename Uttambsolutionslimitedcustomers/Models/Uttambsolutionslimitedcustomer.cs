@@ -36,6 +36,9 @@ namespace Uttambsolutionslimitedcustomers.Models
         public bool Changepassword { get; set; }
         [Column("Lastpasswordchange")]
         public DateTime Lastpasswordchange { get; set; } = DateTime.Now;
+        [Column("Parentid")]
+        public int Parentid { get; set; } = 0;
+
         [Column("Isactive")]
         public bool Isactive { get; set; }
         [Column("Isdeleted")]
