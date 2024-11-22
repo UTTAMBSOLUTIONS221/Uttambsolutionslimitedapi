@@ -4,3 +4,10 @@ services:
     build:
       context: Uttambsolutionslimitedstaffs
       dockerfile: Dockerfile
+
+  uttambsolutionslimitedcustomers:
+    image: ${DOCKER_REGISTRY-}uttambsolutionslimitedcustomers
+    build:
+      context: Uttambsolutionslimitedcustomers
+      dockerfile: Dockerfile
+
