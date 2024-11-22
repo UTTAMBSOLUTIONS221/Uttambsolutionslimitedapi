@@ -45,8 +45,14 @@ services:
 
 
   uttambsolutionslimitedapigateway:
+    container_name: uttamb_solutions_limited_api_gateway
     image: ${DOCKER_REGISTRY-}uttambsolutionslimitedapigateway
     build:
       context: Uttambsolutionslimitedapigateway
       dockerfile: Dockerfile
+    ports:
+      - 8002:8080
+    networks:
+       - backend
+       - frontend
 
