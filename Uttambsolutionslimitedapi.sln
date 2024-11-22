@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uttambsolutionslimitedstaff
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{069426D7-56B7-4811-8518-62F02F02544B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{6664CBDB-E19D-458A-B83C-769C380BB69C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uttambsolutionslimitedapigateway", "Uttambsolutionslimitedapigateway\Uttambsolutionslimitedapigateway.csproj", "{10ED01E0-ACDC-4F0E-A37D-650D3EAE5F3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,10 @@ Global
 		{069426D7-56B7-4811-8518-62F02F02544B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{069426D7-56B7-4811-8518-62F02F02544B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{069426D7-56B7-4811-8518-62F02F02544B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10ED01E0-ACDC-4F0E-A37D-650D3EAE5F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10ED01E0-ACDC-4F0E-A37D-650D3EAE5F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10ED01E0-ACDC-4F0E-A37D-650D3EAE5F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10ED01E0-ACDC-4F0E-A37D-650D3EAE5F3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
