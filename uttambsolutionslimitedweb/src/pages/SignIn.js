@@ -1,115 +1,146 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
 
-  const handleSignIn = async (e) => {
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      setError("Please fill in both email and password.");
-      return;
-    }
+    const newErrors = {};
+    if (!formData.username) newErrors.username = "Email is required.";
+    if (!formData.password) newErrors.password = "Password is required.";
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
+    setErrors(newErrors);
 
-    setError("");
-    setLoading(true);
-
-    const staffApiUrl = "http://localhost:8002/api/Staffauth/Staffauthenticate";
-    const customerApiUrl = "http://localhost:8002/customerlogin";
-
-    try {
-      let response = await fetch(staffApiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: email, password }),
-      });
-
-      let data = await response.json();
-
-      if (!response.ok) {
-        response = await fetch(customerApiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username: email, password }),
-        });
-
-        data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Invalid credentials.");
-        }
-      }
-
-      login(data);
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.message || "An error occurred during sign-in.");
-    } finally {
-      setLoading(false);
+    if (Object.keys(newErrors).length === 0) {
+      console.log("Submitting form", formData);
+      // Add your API call logic here
     }
   };
 
   return (
-    <div className="container d-flex align-items-center justify-content-center" style={{ height: "75vh" }}>
-      <div className="card shadow-lg w-100 p-4" style={{ backgroundColor: "#f8f9fa", maxWidth: "500px", margin: "10px" }}>
-        <h2 className="text-center fw-bold text-uppercase mb-4" style={{ color: "#0a506c" }}>Sign In</h2>
-        <form onSubmit={handleSignIn}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email address</label>
-            <input
-              type="email"
-              className="form-control"
-              id="email"
-              placeholder="Enter email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+    <div>
+      {/* Meta Tags */}
+      <meta charSet="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>UTTAMB SOLUTIONS | SIGNIN</title>
+      
+      {/* External Styles and Fonts */}
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+      />
+          <link href="%PUBLIC_URL%/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
+          <link href="%PUBLIC_URL%/dist/css/adminlte.min.css" rel="stylesheet" />
+      <div className="login-box">
+        <div className="card card-info card-outline">
+          <div className="card-body login-card-body">
+            <p className="login-box-msg font-weight-light text-dark text-uppercase font-weight-bold">
+              Sign in to start your session
+            </p>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              {/* Email Input */}
+              <div className="input-group mb-3">
+                <input
+                  type="email"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="form-control form-control-sm"
+                  placeholder="Email Address"
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <span className="fa fa-envelope" />
+                  </div>
+                </div>
+              </div>
+              {errors.username && (
+                <span className="text-danger font-weight-light">
+                  {errors.username}
+                </span>
+              )}
+
+              {/* Password Input */}
+              <div className="input-group mb-3">
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="form-control form-control-sm"
+                  placeholder="Password"
+                />
+                <div className="input-group-append">
+                  <div className="input-group-text">
+                    <span className="fa fa-lock" />
+                  </div>
+                </div>
+              </div>
+              {errors.password && (
+                <span className="text-danger font-weight-light">
+                  {errors.password}
+                </span>
+              )}
+
+              {/* Buttons */}
+              <div className="row">
+                <div className="col-6">
+                  <button
+                    type="button"
+                    onClick={() => console.log("Cancel")}
+                    className="btn btn-sm btn-danger font-weight-bolder btn-block text-uppercase"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <div className="col-6">
+                  <button
+                    type="submit"
+                    className="btn btn-sm btn-info font-weight-bolder btn-block text-uppercase"
+                  >
+                    Sign in
+                  </button>
+                </div>
+              </div>
+
+              {/* Additional Links */}
+              <div className="row mt-2">
+                <div className="col-5">
+                  <a
+                    href="/forgotpassword"
+                    className="text-uppercase text-info text-xs"
+                  >
+                    Forgot Password?
+                  </a>
+                </div>
+                <div className="col-7">
+                  <p className="text-xs">
+                    Don't have an account yet?{" "}
+                    <a
+                      href="/signup"
+                      className="text-uppercase text-info text-xs"
+                    >
+                      Register
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </form>
           </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          {error && <div className="alert alert-danger" aria-live="polite">{error}</div>}
-          <button
-            type="submit"
-            className="btn w-100"
-            style={{
-              backgroundColor: "#0a506c",
-              color: "white",
-              fontWeight: "bold",
-              padding: "15px",
-              fontSize: "18px",
-              borderRadius: "5px",
-            }}
-            disabled={loading}
-          >
-            {loading ? "Signing In..." : "Sign In"}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );
