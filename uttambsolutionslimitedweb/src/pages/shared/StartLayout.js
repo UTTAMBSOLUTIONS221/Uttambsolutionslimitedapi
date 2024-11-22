@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 
 const StartLayout = () => {
@@ -40,7 +39,7 @@ const StartLayout = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-                <a href="#about" className="nav-link fw-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
+                <a href="#about" className="nav-link fw-bold font-weight-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
                     e.preventDefault();
                     handleNavigation("/#about");
                     }}>
@@ -48,7 +47,7 @@ const StartLayout = () => {
                  </a>
             </li>
             <li className="nav-item">
-            <a href="#solutions" className="nav-link fw-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
+            <a href="#solutions" className="nav-link fw-bold font-weight-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
                 e.preventDefault();
                 handleNavigation("/#solutions");
                 }}>
@@ -56,7 +55,7 @@ const StartLayout = () => {
             </a>
             </li>
             <li className="nav-item">
-            <a href="#services" className="nav-link fw-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
+            <a href="#services" className="nav-link fw-bold font-weight-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
                 e.preventDefault();
                 handleNavigation("/#services");
                 }}>
@@ -64,7 +63,7 @@ const StartLayout = () => {
             </a>
             </li>
             <li className="nav-item">
-                <a href="#contact" className="nav-link fw-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
+                <a href="#contact" className="nav-link fw-bold font-weight-bold text-uppercase text-white text-decoration-none" onClick={(e) => {
                     e.preventDefault();
                     handleNavigation("/#contact");
                     }}>
@@ -72,15 +71,15 @@ const StartLayout = () => {
                 </a>
             </li>
             {/* Sign In Button */}
-            <li className="nav-item ms-2">
+            <li className="nav-item mr-2">
               <Link to="/signin">
-                <button className="btn btn-light fw-bold text-uppercase btn-sm px-4 py-2 w-100 w-sm-auto mb-2 mb-sm-0">Sign In</button>
+                <button className="btn btn-light fw-bold font-weight-bold text-uppercase btn-sm">Sign In</button>
               </Link>
             </li>
             {/* Sign Up Button */}
-            <li className="nav-item ms-2">
+            <li className="nav-item">
               <Link to="/signup">
-                <button className="btn btn-light fw-bold text-uppercase btn-sm px-4 py-2 w-100 w-sm-auto">Sign Up</button>
+                <button className="btn btn-light fw-bold font-weight-bold text-uppercase btn-sm w-100">Sign Up</button>
               </Link>
             </li>
           </ul>

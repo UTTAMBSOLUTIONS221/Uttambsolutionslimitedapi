@@ -7,31 +7,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem("user");
-      if (!savedUser) {
-        console.log("No user found in localStorage");
-        return null;
-      }
-      console.log("User found in localStorage:", savedUser);
-      return JSON.parse(savedUser);
+      return savedUser ? JSON.parse(savedUser) : null;
     } catch (error) {
-      console.error("Error parsing user data from localStorage:", error);
+      console.error("Invalid user data in localStorage, resetting to null:", error);
+      localStorage.removeItem("user"); // Clear invalid data
       return null;
     }
   });
   
   const [token, setToken] = useState(() => {
     try {
-      const savedToken = localStorage.getItem("token");
-      if (!savedToken) {
-        console.log("No token found in localStorage");
-      }
-      return savedToken || null;
+      return localStorage.getItem("token") || null;
     } catch (error) {
       console.error("Error retrieving token from localStorage:", error);
       return null;
     }
   });
-  
 
   const login = (responseData) => {
     const { token, usermodel } = responseData;
