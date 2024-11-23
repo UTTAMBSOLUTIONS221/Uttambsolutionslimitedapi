@@ -45,6 +45,23 @@ const Staffs = () => {
     fetchData();
   }, []);
 
+  // Fetch roles for the dropdown
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get("http://localhost:8001/api/Uttambsolutionslimitedrole"); // Replace with your roles API endpoint
+        setRoles(response.data); // Assuming response.data is an array of roles
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      } finally {
+        setLoadingRoles(false); // Set loadingRoles to false after fetching
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
+
   // Handle search filter
   useEffect(() => {
     const filtered = staffData.filter((item) =>
@@ -143,10 +160,7 @@ const Staffs = () => {
     },
   ];
 
-  const handleEdit = (data) => {
-    setEditData(data);
-    setShowEditModal(true);
-  };
+
   const handleDelete = async (data) => {
     try {
       // Find the staff record by ID
@@ -184,10 +198,126 @@ const Staffs = () => {
   };
 
   const handleAdd = () => {
-    console.log("Add button clicked");
-    // Implement add functionality
+    setShowAddModal(true);
   };
+  const handleSaveNewStaff = async () => {
+    const {
+      firstname,
+      lastname,
+      emailaddress,
+      phonenumber,
+      role,
+    } = newStaff;
+  
+    // Validation checks
+    if (!firstname || !lastname || !emailaddress || !phonenumber || !role) {
+      // Show error alert for missing fields
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'All fields are required!',
+      });
+      return;
+    }
+  
+    // Simple email validation (regex)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(emailaddress)) {
+      // Show error alert for invalid email
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address!',
+      });
+      return;
+    }
+  
+    // Simple phone number validation (basic example)
+    const phoneRegex = /^[0-9]{10}$/; // Assuming phone number should be 10 digits
+    if (!phoneRegex.test(phonenumber)) {
+      // Show error alert for invalid phone number
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Phone Number',
+        text: 'Phone number should be 10 digits!',
+      });
+      return;
+    }
+    // Prepare the staff data object
+    const staffData = {
+      staffid: 0, // Assuming new staff gets a staffid of 0
+      firstname,
+      lastname,
+      emailaddress,
+      phonenumber,
+      passwords: "",
+      passwordhash: "",
+      loginstatus: 2, // Assuming the user is inactive initially
+      confirmemail: true, // Assuming email is confirmed
+      confirmphone: true, // Assuming phone is confirmed
+      changepassword: true, // Assuming the user can change password
+      lastpasswordchange: new Date().toISOString(), // Set current date-time
+      roleid: roles.find((roleObj) => roleObj.rolename === role)?.roleid || 0, // Get roleid based on the selected role
+      isactive: true,
+      isdeleted: false, // Assuming the user is not deleted initially
+      isdefault: false, // Assuming the staff is not a default user
+      createdby: 0, // Assuming admin ID, or use appropriate value
+      modifiedby: 0, // Initially 0 until updated
+      datecreated: new Date().toISOString(),
+      datemodified: new Date().toISOString(),
+    };
+  
+    // If validation passes, make the POST request to save the staff data
+    try {
+      const response = await axios.post('http://localhost:8001/api/Uttambsolutionslimitedstaff', staffData);
+  
+      // If the request is successful
+      if (response.status === 200) {
+        console.log('Staff added:', response.data);
+  
+        // Close the modal
+        setShowAddModal(false);
+  
+        // Show success alert
+        Swal.fire({
+          icon: 'success',
+          title: 'Staff Added',
+          text: 'New staff has been successfully added!',
+        });
+  
+        // Optionally, clear the form after saving
+        setNewStaff({
+          firstname: '',
+          lastname: '',
+          emailaddress: '',
+          phonenumber: '',
+          role: '',
+        });
+        // Reload the page to reflect the changes
+      window.location.reload();
+      } else {
+        // If the response status is not 200, show an error alert
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'There was an issue adding the staff. Please try again later.',
+        });
+      }
+    } catch (error) {
+      // If there's an error with the API request
+      console.error('Error adding staff:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'There was an issue with the server. Please try again later.',
+      });
+    }
+  };  
 
+  const handleEdit = (data) => {
+    setEditData(data);
+    setShowEditModal(true);
+  };
   const handleSaveEdit = async () => {
     const {
       firstname,
@@ -349,6 +479,97 @@ const Staffs = () => {
           )}
         </div>
       </div>
+  {/* Add Modal */}
+  {showAddModal && (
+        <Modal show={showAddModal} onHide={handleCloseAddModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Add Staff</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group>
+                <Row>
+                  <Col md={6}>
+                    <Form.Label>First Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.firstname}
+                      onChange={(e) =>
+                        setNewStaff({ ...newStaff, firstname: e.target.value })
+                      }
+                    />
+                  </Col>
+                  <Col md={6}>
+                    <Form.Label>Last Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.lastname}
+                      onChange={(e) =>
+                        setNewStaff({ ...newStaff, lastname: e.target.value })
+                      }
+                    />
+                  </Col>
+                </Row>
+              </Form.Group>
+              <Form.Group>
+                <Row>
+                  <Col md={6}>
+                    <Form.Label>Phone Number</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.phonenumber}
+                      onChange={(e) =>
+                        setNewStaff({ ...newStaff, phonenumber: e.target.value })
+                      }
+                    />
+                  </Col>
+                  <Col md={6}>
+                    <Form.Label>Role</Form.Label>
+                    <Form.Control
+                        as="select"
+                        value={newStaff.role || ""}
+                        onChange={(e) =>
+                            setNewStaff({ ...newStaff, role: e.target.value })
+                        }
+                        disabled={loadingRoles}
+                        style={{
+                            paddingTop: '8px',    // Add top padding
+                            paddingBottom: '8px'  // Add bottom padding
+                        }}
+                        >
+                        <option value="">Select Role</option>
+                        {roles.map((role) => (
+                            <option key={role.roleid} value={role.rolename}>
+                            {role.rolename}
+                            </option>
+                        ))}
+                    </Form.Control>
+                  </Col>
+                </Row>
+              </Form.Group>
+              <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={newStaff.emailaddress}
+                  onChange={(e) =>
+                    setNewStaff({ ...newStaff, emailaddress: e.target.value })
+                  }
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseAddModal}>
+              Cancel
+            </Button>
+            <Button variant="success" onClick={handleSaveNewStaff}>
+              Add Staff
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+
        {/* Edit Modal */}
        {showEditModal && (
           <Modal show={showEditModal} onHide={handleCloseEditModal}>

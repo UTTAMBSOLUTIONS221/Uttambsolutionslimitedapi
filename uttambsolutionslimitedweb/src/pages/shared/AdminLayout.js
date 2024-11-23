@@ -18,7 +18,7 @@ const AdminLayout = () => {
       <nav className="main-header navbar navbar-expand fixed-top bg-white">
         <ul className="navbar-nav">
             <li className="nav-item">
-                <a className="nav-link" data-widget="pushmenu" href="#" role="button"><i className="fas fa-bars text-dark"></i></a>
+                <a className="nav-link" data-widget="pushmenu" role="button"><i className="fas fa-bars text-dark"></i></a>
             </li>
         </ul>
         <ul className="nav-item order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">

@@ -111,15 +111,24 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(Uttambsolutionslimitedstaff staff)
         {
+            Encryptdecrypt sec = new Encryptdecrypt();
+            Stringgenerator str = new Stringgenerator();
+            string Passwordhash = str.RandomString(12);
             if (staff.Roleid == 0 || staff.Roleid == null)
             {
                 staff.Roleid = 1;
             }
-            Encryptdecrypt sec = new Encryptdecrypt();
-            Stringgenerator str = new Stringgenerator();
-            string Passwordhash = str.RandomString(12);
-            staff.Passwordhash = Passwordhash;
-            staff.Passwords = sec.Encrypt(staff.Passwords, Passwordhash);
+            if (staff.Passwords == null)
+            {
+                string Password = str.RandomString(8);
+                staff.Passwordhash = Passwordhash;
+                staff.Passwords = sec.Encrypt(Password, Passwordhash);
+            }
+            else
+            {
+                staff.Passwordhash = Passwordhash;
+                staff.Passwords = sec.Encrypt(staff.Passwords, Passwordhash);
+            }
             await _staffDbContext.Uttambsolutionslimitedstaffs.AddAsync(staff);
             await _staffDbContext.SaveChangesAsync();
             return Ok();
