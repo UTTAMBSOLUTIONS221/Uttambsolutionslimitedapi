@@ -10,14 +10,16 @@ const AdminLayout = () => {
   };
 
   return (
+  <div className="hold-transition sidebar-mini sidebar-white layout-navbar-white layout-fixed layout-navbar-fixed layout-footer-fixed">
     <div className="wrapper">
+    <div className="preloader flex-column justify-content-center align-items-center">
+        <img className="animation__wobble" src="/uttambsolutionlogo.jpg" alt="UTTAMB SOLUTIONS LIMITED" height="60" width="60"/>
+    </div>
       <nav className="main-header navbar navbar-expand fixed-top bg-white">
         <ul className="navbar-nav">
-          <li className="nav-item">
-            <button className="nav-link" data-widget="pushmenu">
-              <i className="fas fa-bars text-dark" />
-            </button>
-          </li>
+            <li className="nav-item">
+                <a className="nav-link" data-widget="pushmenu" href="#" role="button"><i className="fas fa-bars text-dark"></i></a>
+            </li>
         </ul>
         <ul className="nav-item order-1 order-md-3 navbar-nav navbar-no-expand ml-auto">
           <li className="nav-link dropdown">
@@ -114,6 +116,7 @@ const AdminLayout = () => {
           © 2020 - {new Date().getFullYear()} Uttamb Solutions. All rights reserved.
         </p>
       </footer>
+    </div>
     </div>
   );
 };

@@ -70,12 +70,6 @@ const SignIn = () => {
   };
   return (
   <div>
-    <meta charSet="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UTTAMB SOLUTIONS | SIGNIN</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" />
-    <link href="/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
-    <link href="/dist/css/adminlte.min.css" rel="stylesheet" />
   <div className="hold-transition login-page">
     <div className="login-box">
       <div className="card card-info card-outline">

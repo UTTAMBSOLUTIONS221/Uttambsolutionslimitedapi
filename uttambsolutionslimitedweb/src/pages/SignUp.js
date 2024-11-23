@@ -5,9 +5,9 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     firstname: "",
     lastname: "",
-    email: "",
-    phone: "",
-    password: "",
+    emailaddress: "",
+    phonenumber: "",
+    passwords: "",
     confirmPassword: "",
   });
 
@@ -49,18 +49,18 @@ const SignUp = () => {
     const errors = {};
     if (!formData.firstname) errors.firstname = "First name is required.";
     if (!formData.lastname) errors.lastname = "Last name is required.";
-    if (!formData.email) {
-      errors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Email is invalid.";
+    if (!formData.emailaddress) {
+      errors.emailaddress = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(formData.emailaddress)) {
+      errors.emailaddress = "Email is invalid.";
     }
-    if (!formData.phone) errors.phone = "Phone number is required.";
-    if (!formData.password) {
-      errors.password = "Password is required.";
-    } else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters.";
+    if (!formData.phonenumber) errors.phonenumber = "Phone number is required.";
+    if (!formData.passwords) {
+      errors.passwords = "Password is required.";
+    } else if (formData.passwords.length < 6) {
+      errors.passwords = "Password must be at least 6 characters.";
     }
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.passwords !== formData.confirmPassword) {
       errors.confirmPassword = "Passwords do not match.";
     }
     return errors;
@@ -135,8 +135,8 @@ const SignUp = () => {
                 <div className="input-group mb-3">
                   <input
                     type="email"
-                    name="email"
-                    value={formData.email}
+                    name="emailaddress"
+                    value={formData.emailaddress}
                     onChange={handleChange}
                     className="form-control"
                     placeholder="Email"
@@ -147,19 +147,19 @@ const SignUp = () => {
                     </div>
                   </div>
                 </div>
-                {errors.email && (
-                  <span className="text-danger">{errors.email}</span>
+                {errors.emailaddress && (
+                  <span className="text-danger">{errors.emailaddress}</span>
                 )}
 
                 {/* Phone */}
                 <div className="input-group mb-3">
                   <input
                     type="text"
-                    name="phone"
-                    value={formData.phone}
+                    name="phonenumber"
+                    value={formData.phonenumber}
                     onChange={handleChange}
                     className="form-control"
-                    placeholder="Phone"
+                    placeholder="Phone Number"
                   />
                   <div className="input-group-append">
                     <div className="input-group-text">
@@ -167,8 +167,8 @@ const SignUp = () => {
                     </div>
                   </div>
                 </div>
-                {errors.phone && (
-                  <span className="text-danger">{errors.phone}</span>
+                {errors.phonenumber && (
+                  <span className="text-danger">{errors.phonenumber}</span>
                 )}
                   <div className="row">
                   <div className="col-md-6">
@@ -176,8 +176,8 @@ const SignUp = () => {
                       <div className="input-group mb-3">
                         <input
                           type="password"
-                          name="password"
-                          value={formData.password}
+                          name="passwords"
+                          value={formData.passwords}
                           onChange={handleChange}
                           className="form-control"
                           placeholder="Password"
@@ -188,8 +188,8 @@ const SignUp = () => {
                           </div>
                         </div>
                       </div>
-                      {errors.password && (
-                        <span className="text-danger">{errors.password}</span>
+                      {errors.passwords && (
+                        <span className="text-danger">{errors.passwords}</span>
                       )}
                     </div>
                     <div className="col-md-6">
