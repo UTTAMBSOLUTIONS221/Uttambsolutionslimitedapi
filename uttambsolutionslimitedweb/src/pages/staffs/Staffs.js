@@ -70,8 +70,8 @@ const Staffs = () => {
           title: "Actions",
           orderable: false,
           render: (data, type, row) => `
-            <button class="btn btn-info btn-xs mx-1" onclick="editStaff(${row.id})">Edit</button>
-            <button class="btn btn-danger btn-xs mx-1" onclick="deleteStaff(${row.id})">Delete</button>
+            <button class="btn btn-info btn-xs" onclick="editStaff(${row.id})">Edit</button>
+            <button class="btn btn-danger btn-xs" onclick="deleteStaff(${row.id})">Delete</button>
           `,
         },
       ],
