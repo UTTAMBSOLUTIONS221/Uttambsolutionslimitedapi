@@ -107,31 +107,83 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             var staff = await _staffDbContext.Uttambsolutionslimitedstaffs.FindAsync(Staffid);
             return staff;
         }
-
         [HttpPost]
         public async Task<ActionResult> Create(Uttambsolutionslimitedstaff staff)
         {
-            Encryptdecrypt sec = new Encryptdecrypt();
-            Stringgenerator str = new Stringgenerator();
-            string Passwordhash = str.RandomString(12);
-            if (staff.Roleid == 0 || staff.Roleid == null)
+            try
             {
-                staff.Roleid = 1;
+                // Initialize helper classes
+                Encryptdecrypt sec = new Encryptdecrypt();
+                Stringgenerator str = new Stringgenerator();
+                string Passwordhash = str.RandomString(12);
+
+                // Set default RoleId if not provided
+                if (staff.Roleid == 0 || staff.Roleid == null)
+                {
+                    staff.Roleid = 1;
+                }
+
+                // Generate and encrypt password
+                if (string.IsNullOrEmpty(staff.Passwords))
+                {
+                    string Password = str.RandomString(8);
+                    staff.Passwordhash = Passwordhash;
+                    staff.Passwords = sec.Encrypt(Password, Passwordhash);
+                }
+                else
+                {
+                    staff.Passwordhash = Passwordhash;
+                    staff.Passwords = sec.Encrypt(staff.Passwords, Passwordhash);
+                }
+
+                // Save the new staff member to the database
+                await _staffDbContext.Uttambsolutionslimitedstaffs.AddAsync(staff);
+                await _staffDbContext.SaveChangesAsync();
+
+                // Retrieve all staff data
+                var allStaff = await _staffDbContext.Uttambsolutionslimitedstaffs.ToListAsync();
+
+                // Send an email to the newly created staff
+                await SendEmailNotificationAsync(staff);
+
+                // Return all staff data as response
+                return Ok(allStaff);
             }
-            if (staff.Passwords == null)
+            catch (Exception ex)
             {
-                string Password = str.RandomString(8);
-                staff.Passwordhash = Passwordhash;
-                staff.Passwords = sec.Encrypt(Password, Passwordhash);
+                // Handle exceptions and return a meaningful error
+                return BadRequest(new { message = "An error occurred while creating the staff.", error = ex.Message });
             }
-            else
+        }
+
+        // Helper method to send email notification
+        private async Task SendEmailNotificationAsync(Uttambsolutionslimitedstaff staff)
+        {
+            try
             {
-                staff.Passwordhash = Passwordhash;
-                staff.Passwords = sec.Encrypt(staff.Passwords, Passwordhash);
+                // Example email content
+                string subject = "Welcome to Uttamb Solutions";
+                string body = $@"
+            <p>Dear {staff.Firstname} {staff.Lastname},</p>
+            <p>Welcome to Uttamb Solutions! Your account has been created successfully.</p>
+            <p><strong>Login Details:</strong></p>
+            <ul>
+                <li>Email: {staff.Emailaddress}</li>
+                <li>Password: {staff.Passwords}</li> <!-- Use original password before encryption -->
+            </ul>
+            <p>We recommend changing your password upon first login.</p>
+            <p>Best Regards,</p>
+            <p>Uttamb Solutions Team</p>";
+
+                // Configure and send the email
+                EmailSenderHelper emailService = new EmailSenderHelper(); // Assume you have an EmailService class
+                bool data = emailService.UttambsolutionssendemailAsync(staff.Emailaddress, subject, body, true, "", "", "");
             }
-            await _staffDbContext.Uttambsolutionslimitedstaffs.AddAsync(staff);
-            await _staffDbContext.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                Console.WriteLine($"Failed to send email to {staff.Emailaddress}. Error: {ex.Message}");
+            }
         }
 
         [HttpPut]
