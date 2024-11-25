@@ -152,6 +152,7 @@ const Vehiclemodels = () => {
         const vehicleModelToEdit = await response.json();
         setNewVehicleModel({
             vehiclemodelname: vehicleModelToEdit.vehiclemodelname,
+            vehicleMake: vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakeid === vehicleModelToEdit.vehiclemakeid)?.vehiclemakename || "",
         });
         setShowModal(true);
       } else {
@@ -177,7 +178,8 @@ const Vehiclemodels = () => {
     // Add the current permission ID to the updated permission object
     const updatedVehicleModel = { 
       ...newVehicleModel, 
-      vehiclemodelid: currentVehicleModelId // Ensure the correct ID is included
+      vehiclemodelid: currentVehicleModelId,
+      vehiclemakeid:vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0, 
     };
   
     try {

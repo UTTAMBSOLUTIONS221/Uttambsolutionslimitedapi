@@ -96,9 +96,27 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Uttambsolutionslimitedstaff>> GetCustomers()
+        public ActionResult<IEnumerable<Uttambsolutionslimitedstaff>> Get()
         {
-            return _staffDbContext.Uttambsolutionslimitedstaffs;
+            var staffWithRoles = _staffDbContext.Uttambsolutionslimitedstaffs
+        .Join(
+            _staffDbContext.Set<Uttambsolutionslimitedrole>(),
+            staff => staff.Roleid,
+            role => role.Roleid,
+            (staff, role) => new
+            {
+                Staffid = staff.Staffid,
+                Firstname = staff.Firstname,
+                Lastname = staff.Lastname,
+                Emailaddress = staff.Emailaddress,
+                Phonenumber = staff.Phonenumber,
+                Rolename = role.Rolename
+            }
+        )
+        .Where(staff => staff.Rolename != null) // Example condition
+        .ToList();
+
+            return Ok(staffWithRoles);
         }
 
         [HttpGet("{Staffid:int}")]

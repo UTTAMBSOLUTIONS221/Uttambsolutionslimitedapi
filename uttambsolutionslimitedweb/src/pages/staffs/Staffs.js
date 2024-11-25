@@ -68,7 +68,7 @@ const Staffs = () => {
         { data: "lastname", title: "Last Name" },
         { data: "emailaddress", title: "Email" },
         { data: "phonenumber", title: "Phone" },
-        { data: "roleid", title: "Role" },
+        { data: "rolename", title: "Role" },
         {
           data: null,
           title: "Actions",
@@ -211,7 +211,8 @@ const Staffs = () => {
     // Add the current permission ID to the updated permission object
     const updatedStaff = { 
       ...newStaff, 
-      staffid: currentStaffId // Ensure the correct ID is included
+      staffid: currentStaffId,
+      roleid: roles.find((roleObj) => roleObj.rolename === newStaff.role)?.roleid || 0,
     };
   
     try {
