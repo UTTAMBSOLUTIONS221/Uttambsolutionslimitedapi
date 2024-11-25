@@ -11,7 +11,7 @@ const Vehiclemodels = () => {
   const [vehicleMakes, setVehicleMakes] = useState([]);
   const [newVehicleModel, setNewVehicleModel] = useState({
     vehiclemodelname: "",
-    Vehiclemakeid:0
+    vehiclemakeid:0
   });
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false); // State to determine if we're editing
@@ -87,7 +87,7 @@ const Vehiclemodels = () => {
     setEditMode(false);  // Reset to add mode
     setNewVehicleModel({
         vehiclemodelname: "",
-        Vehiclemakeid:0
+        vehiclemakeid:0
     });
     setShowModal(true);
   };
@@ -106,7 +106,11 @@ const Vehiclemodels = () => {
 
   const handleSaveNewVehicleModel = async () => {
     if (!validateForm()) return;
-
+    const newVehicleModel = {
+      vehiclemodelname:newVehicleModel.vehiclemodelname,
+      vehiclemakeid:vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0, 
+    };
+    
     try {
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
         method: "POST",
