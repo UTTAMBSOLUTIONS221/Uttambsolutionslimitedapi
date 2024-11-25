@@ -15,9 +15,13 @@ namespace Uttambsolutionslimitedvehicles.Models
         [Column("Vehiclemodelname")]
         public string? Vehiclemodelname { get; set; }
 
+
         [ForeignKey("Uttambsolutionslimitedvehiclemake")]
         [Column("Vehiclemakeid")]
         public int Vehiclemakeid { get; set; }
+
+        [Column("Vehiclemodelimage")]
+        public byte[]? Vehiclemodelimage { get; set; }
 
         // Navigation property for the related make
         public Uttambsolutionslimitedvehiclemake? Uttambsolutionslimitedvehiclemake { get; set; }
