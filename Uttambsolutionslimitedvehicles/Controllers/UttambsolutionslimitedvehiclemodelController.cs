@@ -26,10 +26,10 @@ namespace Uttambsolutionslimitedvehicles.Controllers
             make => make.Vehiclemakeid,  // Primary key in the makes table
             (model, make) => new
             {
-                ModelId = model.Vehiclemodelid,
-                ModelName = model.Vehiclemodelname,
-                MakeId = make.Vehiclemakeid,
-                MakeName = make.Vehiclemakename
+                Vehiclemodelid = model.Vehiclemodelid,
+                Vehiclemodelname = model.Vehiclemodelname,
+                Vehiclemakeid = make.Vehiclemakeid,
+                Vehiclemakename = make.Vehiclemakename
             }
         )
         .ToList();
