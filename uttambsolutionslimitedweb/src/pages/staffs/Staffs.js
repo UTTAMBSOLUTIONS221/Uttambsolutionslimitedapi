@@ -1,12 +1,33 @@
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
-import "datatables.net-bs4"; // DataTables Bootstrap 4 integration
-import "datatables.net-bs4/css/dataTables.bootstrap4.css"; // DataTables CSS for Bootstrap 4
+import "datatables.net-bs4";
+import "datatables.net-bs4/css/dataTables.bootstrap4.css";
 
 const Staffs = () => {
-  const [vehicleMakeName, setVehicleMakeName] = useState("");
+  const [staffData, setStaffData] = useState([]);
+  const [staffName, setStaffName] = useState("");
+  const [staffRole, setStaffRole] = useState("");
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    // Fetch all data
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff");
+        if (response.ok) {
+          const data = await response.json();
+          setStaffData(data);
+        } else {
+          console.error("Failed to fetch data");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     // Initialize DataTable
@@ -15,56 +36,13 @@ const Staffs = () => {
     }
 
     const table = $("#staffsTable").DataTable({
-      processing: true,
-      serverSide: true,
-      ajax: {
-        url: "http://localhost:8001/api/Uttambsolutionslimitedstaff", // Replace with your API endpoint
-        method: "GET",
-        dataSrc: function (json) {
-          console.log("API response:", json);
-          return json; // Adjust this if the API response has nested data
-        },
-      },
+      data: staffData,
       columns: [
-        {
-          data: "firstname",
-          title: "Name",
-          render: (data, type, row) =>
-            `${row.firstname} ${row.lastname || ""}`,
-        },
+        { data: "firstname", title: "First Name" },
+        { data: "lastname", title: "Last Name" },
         { data: "emailaddress", title: "Email" },
         { data: "phonenumber", title: "Phone" },
         { data: "roleid", title: "Role" },
-        {
-          data: null,
-          title: "Status",
-          render: (data, type, row) => {
-            const isActiveStatus = row.isactive ? "Active" : "Inactive";
-            const isDeletedStatus = row.isdeleted ? "Deleted" : "Not Deleted";
-            const loginStatus =
-              row.loginstatus === 1
-                ? "Online"
-                : row.loginstatus === 0
-                ? "Offline"
-                : "Unknown";
-
-            return `
-              <span class="badge ${
-                row.isactive ? "badge-success" : "badge-warning"
-              }">${isActiveStatus}</span>
-              <span class="badge ${
-                row.isdeleted ? "badge-danger" : "badge-info"
-              }">${isDeletedStatus}</span>
-              <span class="badge ${
-                row.loginstatus === 1
-                  ? "badge-primary"
-                  : row.loginstatus === 0
-                  ? "badge-secondary"
-                  : "badge-dark"
-              }">${loginStatus}</span>
-            `;
-          },
-        },
         {
           data: null,
           title: "Actions",
@@ -77,44 +55,49 @@ const Staffs = () => {
       ],
     });
 
-    // Cleanup on unmount
     return () => {
       table.destroy();
     };
-  }, []);
+  }, [staffData]);
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => {
     setShowModal(false);
     setError("");
+    setStaffName("");
+    setStaffRole("");
   };
 
   const handleSaveChanges = async () => {
-    if (!vehicleMakeName.trim()) {
-      setError("Make name is required.");
+    if (!staffName.trim() || !staffRole.trim()) {
+      setError("Both staff name and role are required.");
       return;
     }
 
     try {
       const response = await fetch(
-        "http://localhost:8001/api/Uttambsolutionslimitedstaffs", // Replace with your POST API endpoint
+        "http://localhost:8001/api/Uttambsolutionslimitedstaffs", // Replace with POST API endpoint
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: vehicleMakeName }),
+          body: JSON.stringify({
+            name: staffName,
+            role: staffRole,
+          }),
         }
       );
 
       if (response.ok) {
-        alert("Vehicle make created successfully!");
-        setVehicleMakeName(""); // Clear input
-        setShowModal(false); // Close modal
-        $("#staffsTable").DataTable().ajax.reload(); // Reload table data
+        alert("Staff added successfully!");
+        // Reload data from API
+        const updatedData = await response.json();
+        setStaffData((prev) => [...prev, updatedData]);
+        handleCloseModal();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Failed to save.");
+        setError(errorData.message || "Failed to save staff.");
       }
     } catch (err) {
       setError(`Network error: ${err.message}`);
@@ -167,13 +150,23 @@ const Staffs = () => {
               <div className="modal-body">
                 {error && <div className="alert alert-danger">{error}</div>}
                 <div className="form-group">
-                  <label htmlFor="vehicleMakeName">Staff Name</label>
+                  <label htmlFor="staffName">Staff Name</label>
                   <input
                     type="text"
-                    id="vehicleMakeName"
+                    id="staffName"
                     className="form-control"
-                    value={vehicleMakeName}
-                    onChange={(e) => setVehicleMakeName(e.target.value)}
+                    value={staffName}
+                    onChange={(e) => setStaffName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="staffRole">Role</label>
+                  <input
+                    type="text"
+                    id="staffRole"
+                    className="form-control"
+                    value={staffRole}
+                    onChange={(e) => setStaffRole(e.target.value)}
                   />
                 </div>
               </div>
