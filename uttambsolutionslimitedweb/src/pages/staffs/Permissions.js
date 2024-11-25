@@ -159,7 +159,7 @@ const Permissions = () => {
     // Add the current permission ID to the updated permission object
     const updatedPermission = { 
       ...newPermission, 
-      id: currentPermissionId // Ensure the correct ID is included
+      permissionid: currentPermissionId // Ensure the correct ID is included
     };
   
     try {

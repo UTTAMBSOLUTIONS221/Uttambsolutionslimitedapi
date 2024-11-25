@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import { FaPlus, FaSave, FaTimes, FaEdit } from "react-icons/fa";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Staffs = () => {
   const [staffData, setStaffData] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [currentStaff, setCurrentStaff] = useState(null);
   const [newStaff, setNewStaff] = useState({
     firstname: "",
     lastname: "",
@@ -18,11 +17,12 @@ const Staffs = () => {
     role: "",
   });
   const [showModal, setShowModal] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
+  const [editMode, setEditMode] = useState(false); // State to determine if we're editing
+  const [currentStaffId, setCurrentStaffId] = useState(null); // Store the ID of the permission being edited
   const [errors, setErrors] = useState({});
 
-  // Fetch staff and roles data on component load
   useEffect(() => {
+    // Fetch staff data
     const fetchStaffData = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff");
@@ -37,6 +37,7 @@ const Staffs = () => {
       }
     };
 
+    // Fetch roles data
     const fetchRoles = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedrole");
@@ -55,7 +56,6 @@ const Staffs = () => {
     fetchRoles();
   }, []);
 
-  // Initialize DataTable
   useEffect(() => {
     if ($.fn.DataTable.isDataTable("#staffsTable")) {
       $("#staffsTable").DataTable().destroy();
@@ -73,26 +73,26 @@ const Staffs = () => {
           data: null,
           title: "Actions",
           orderable: false,
-          render: (data, type, row) => `
-            <button class="btn btn-info btn-xs edit-btn">Edit</button>
-            <button class="btn btn-danger btn-xs delete-btn">Delete</button>
-          `,
+          className: "text-right",  
+          render: (data, type, row) => {
+            return ` 
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-info btn-xs" data-id="${row.staffid}">Edit</button>
+                <button class="btn btn-danger btn-xs ml-2" data-id="${row.staffid}">Delete</button>
+             </div>
+            `;
+          },
+          createdCell: (cell, cellData, rowData) => {
+            // Add event listeners after rendering the table
+            $(cell).find(".btn-info").on("click", () => editStaff(rowData.staffid));
+            $(cell).find(".btn-danger").on("click", () => deleteStaff(rowData.staffid));
+          },
         },
       ],
     });
-
-    $("#staffsTable tbody").on("click", ".edit-btn", function () {
-      const rowData = $("#staffsTable").DataTable().row($(this).parents("tr")).data();
-      handleEditStaff(rowData);
-    });
   }, [staffData]);
 
-  // Show modal for adding or editing staff
-  const handleShowModal = () => {
-    setShowModal(true);
-    setErrors({});
-  };
-
+  const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => {
     setShowModal(false);
     setNewStaff({
@@ -102,22 +102,7 @@ const Staffs = () => {
       emailaddress: "",
       role: "",
     });
-    setCurrentStaff(null);
-    setIsEdit(false);
-  };
-
-  // Handle Edit
-  const handleEditStaff = (staff) => {
-    setIsEdit(true);
-    setCurrentStaff(staff);
-    setNewStaff({
-      firstname: staff.firstname,
-      lastname: staff.lastname,
-      phonenumber: staff.phonenumber,
-      emailaddress: staff.emailaddress,
-      role: roles.find((role) => role.roleid === staff.roleid)?.rolename || "",
-    });
-    handleShowModal();
+    setErrors({});
   };
 
   const validateForm = () => {
@@ -131,48 +116,153 @@ const Staffs = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Save or Update Staff
-  const handleSaveStaff = async () => {
+  const handleSaveNewStaff = async () => {
     if (!validateForm()) return;
-    const payload = {
-      ...currentStaff,
-      firstname: newStaff.firstname,
-      lastname: newStaff.lastname,
-      emailaddress: newStaff.emailaddress,
-      phonenumber: newStaff.phonenumber,
-      roleid: roles.find((role) => role.rolename === newStaff.role)?.roleid || 0,
+    const staffData = {
+      staffid: 0, // Assuming new staff gets a staffid of 0
+      firstname:newStaff.firstname,
+      lastname:newStaff.lastname,
+      emailaddress:newStaff.emailaddress,
+      phonenumber:newStaff.phonenumber,
+      passwords: "",
+      passwordhash: "",
+      loginstatus: 2, // Assuming the user is inactive initially
+      confirmemail: true, // Assuming email is confirmed
+      confirmphone: true, // Assuming phone is confirmed
+      changepassword: true, // Assuming the user can change password
+      lastpasswordchange: new Date().toISOString(), // Set current date-time
+      roleid: roles.find((roleObj) => roleObj.rolename === newStaff.role)?.roleid || 0, // Get roleid based on the selected role
+      isactive: true,
+      isdeleted: false, // Assuming the user is not deleted initially
+      isdefault: false, // Assuming the staff is not a default user
+      createdby: 0, // Assuming admin ID, or use appropriate value
+      modifiedby: 0, // Initially 0 until updated
+      datecreated: new Date().toISOString(),
+      datemodified: new Date().toISOString(),
     };
-
     try {
-      const url = `http://localhost:8001/api/Uttambsolutionslimitedstaff${isEdit ? `/${currentStaff.staffid}` : ""}`;
-      const method = isEdit ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(staffData),
       });
 
       if (response.ok) {
-        const updatedData = await response.json();
-        setStaffData((prev) =>
-          isEdit
-            ? prev.map((staff) => (staff.staffid === updatedData.staffid ? updatedData : staff))
-            : [...prev, updatedData]
-        );
         Swal.fire({
-          icon: "success",
-          title: isEdit ? "Staff updated successfully!" : "Staff added successfully!",
+          icon: 'success',
+          title: 'Success',
+          text: 'Staff added successfully!',
         });
         handleCloseModal();
+        window.location.reload();
       } else {
         Swal.fire({
-          icon: "error",
-          title: "Failed to save staff!",
+          icon: 'warning',
+          title: 'Failed to save staff!',
+        });
+        const errorData = await response.json();
+        console.error(errorData.message || "Failed to save staff.");
+      }
+    } catch (error) {
+      console.error("Error saving staff:", error.message);
+    }
+  };
+
+   // Edit Staff Handler using GET
+   const editStaff = async (staffId) => {
+    console.log(staffId);
+    setEditMode(true); // Set editing mode
+    setCurrentStaffId(staffId); // Set the current permission ID
+
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedstaff/${staffId}`);
+      if (response.ok) {
+        const staffToEdit = await response.json();
+        setNewStaff({
+          firstname: staffToEdit.firstname,
+          lastname: staffToEdit.lastname,
+          phonenumber: staffToEdit.phonenumber,
+          emailaddress: staffToEdit.emailaddress,
+          role: roles.find((role) => role.roleid === staffToEdit.roleid)?.rolename || "",
+        });
+        setShowModal(true);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch staff details!',
         });
       }
     } catch (error) {
-      console.error("Error saving staff:", error);
+      console.error("Error fetching staff details:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error fetching staff details!',
+      });
+    }
+  };
+
+  const handleUpdateNewStaff = async () => {
+    if (!validateForm()) return;
+  
+    // Add the current permission ID to the updated permission object
+    const updatedStaff = { 
+      ...newStaff, 
+      staffid: currentStaffId // Ensure the correct ID is included
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff", {
+        method: "PUT", // Use PUT for updates
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedStaff), // Send the updated permission object
+      });
+  
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Staff updated successfully!',
+        });
+        handleCloseModal();
+        window.location.reload();  // Refresh the page to reflect changes
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Failed to update staff!',
+        });
+      }
+    } catch (error) {
+      console.error("Error updating staff:", error);
+    }
+  };
+
+  const deleteStaff = async (staffId) => {
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedstaff/${staffId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Staff deleted successfully!',
+        });
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to delete staff!',
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting staff:", error);
     }
   };
 
@@ -191,9 +281,15 @@ const Staffs = () => {
       </div>
 
       {showModal && (
-        <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false} centered>
-          <Modal.Header closeButton>
-            <Modal.Title>{isEdit ? "Edit Staff" : "Add Staff"}</Modal.Title>
+        <Modal
+          show={showModal}
+          onHide={handleCloseModal}
+          backdrop="static"
+          keyboard={false}
+          centered
+        >
+         <Modal.Header closeButton className="modal-header-custom">
+           <Modal.Title>{editMode ? 'Edit Staff' : 'Add Staff'}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
@@ -238,6 +334,7 @@ const Staffs = () => {
                     <Form.Label>Role</Form.Label>
                     <Form.Control
                       as="select"
+                      className="content-justify-center"
                       value={newStaff.role}
                       onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
                     >
@@ -252,27 +349,27 @@ const Staffs = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              <Row>
-                <Col>
-                  <Form.Group>
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control
-                      type="email"
-                      value={newStaff.emailaddress}
-                      onChange={(e) => setNewStaff({ ...newStaff, emailaddress: e.target.value })}
-                    />
-                    {errors.emailaddress && <small className="text-danger">{errors.emailaddress}</small>}
-                  </Form.Group>
-                </Col>
-              </Row>
+              <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={newStaff.emailaddress}
+                  onChange={(e) => setNewStaff({ ...newStaff, emailaddress: e.target.value })}
+                />
+                {errors.emailaddress && <small className="text-danger">{errors.emailaddress}</small>}
+              </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
-              <FaTimes /> Close
+              <FaTimes /> Cancel
             </Button>
-            <Button variant="info" onClick={handleSaveStaff}>
-              <FaSave /> {isEdit ? "Update" : "Save"}
+            <Button
+              variant="info"
+              onClick={editMode ? handleUpdateNewStaff : handleSaveNewStaff}
+              className="btn-custom"
+            >
+              <FaSave /> {editMode ? 'Update Staff' : 'Add Staff'}
             </Button>
           </Modal.Footer>
         </Modal>

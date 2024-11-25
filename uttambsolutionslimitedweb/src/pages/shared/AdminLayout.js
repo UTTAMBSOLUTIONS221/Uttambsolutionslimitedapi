@@ -109,7 +109,7 @@ const AdminLayout = () => {
                   <li className="nav-item main">
                     <Link to="/rolepermissions" className="nav-link">
                       <i className="nav-icon fas fa-users" />
-                      <p>Role Permissions</p>
+                      <p>Roles</p>
                     </Link>
                   </li>
                   <li className="nav-item main">
