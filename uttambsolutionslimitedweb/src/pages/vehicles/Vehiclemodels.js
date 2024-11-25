@@ -8,8 +8,10 @@ import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons f
 
 const Vehiclemodels = () => {
   const [vehicleModelsData, setVehicleModelsData] = useState([]);
+  const [vehicleMakes, setVehicleMakes] = useState([]);
   const [newVehicleModel, setNewVehicleModel] = useState({
-    vehiclemodelname: ""
+    vehiclemodelname: "",
+    Vehiclemakeid:0
   });
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false); // State to determine if we're editing
@@ -31,8 +33,22 @@ const Vehiclemodels = () => {
         console.error("Error fetching vehicle Models data:", error);
       }
     };
+    const fetchVehicleMakes = async () => {
+      try {
+        const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemake");
+        if (response.ok) {
+          const data = await response.json();
+          setVehicleMakes(data);
+        } else {
+          console.error("Failed to fetch vehicle makes");
+        }
+      } catch (error) {
+        console.error("Error fetching vehicle makes:", error);
+      }
+    };
 
     fetchVehicleModelsData();
+    fetchVehicleMakes();
   }, []);
 
   useEffect(() => {
@@ -71,6 +87,7 @@ const Vehiclemodels = () => {
     setEditMode(false);  // Reset to add mode
     setNewVehicleModel({
         vehiclemodelname: "",
+        Vehiclemakeid:0
     });
     setShowModal(true);
   };
@@ -240,16 +257,37 @@ const Vehiclemodels = () => {
           <Modal.Body className="modal-body-custom">
             <Form>
               <Row className="mb-3">
-              <Form.Group>
-                    <Form.Label className="form-label-custom">Model Name</Form.Label>
+              <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label>Vehicle Make</Form.Label>
                     <Form.Control
-                      type="text"
-                      value={newVehicleModel.vehiclemodelname}
-                      onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })}
-                      className="form-control-custom"
-                    />
-                    {errors.vehiclemodelname && <small className="text-danger">{errors.vehiclemodelname}</small>}
+                      as="select"
+                      className="content-justify-center"
+                      value={newVehicleModel.vehicleMake}
+                      onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })}
+                    >
+                      <option value="">Select Vehicle Make</option>
+                      {vehicleMakes.map((vehicleMake) => (
+                        <option key={vehicleMake.vehiclemakeid} value={vehicleMake.vehiclemakename}>
+                          {vehicleMake.vehiclemakename}
+                        </option>
+                      ))}
+                    </Form.Control>
+                    {errors.vehicleMake && <small className="text-danger">{errors.vehicleMake}</small>}
                   </Form.Group>
+                  </Col>
+                  <Col xs={12} sm={6}>
+                    <Form.Group>
+                      <Form.Label className="form-label-custom">Model Name</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={newVehicleModel.vehiclemodelname}
+                        onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })}
+                        className="form-control-custom"
+                      />
+                      {errors.vehiclemodelname && <small className="text-danger">{errors.vehiclemodelname}</small>}
+                    </Form.Group>
+                  </Col>
               </Row>
             </Form>
           </Modal.Body>
