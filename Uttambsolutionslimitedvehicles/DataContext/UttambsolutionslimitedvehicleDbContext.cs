@@ -26,5 +26,6 @@ namespace Uttambsolutionslimitedvehicles.DataContext
 
         // DbSets for the entities
         public DbSet<Uttambsolutionslimitedvehiclemake> Uttambsolutionslimitedvehiclemakes { get; set; }
+        public DbSet<Uttambsolutionslimitedvehiclemodel> Uttambsolutionslimitedvehiclemodels { get; set; }
     }
 }

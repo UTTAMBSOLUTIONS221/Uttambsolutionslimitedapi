@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Uttambsolutionslimitedvehicles.DataContext;
+using Uttambsolutionslimitedvehicles.Models;
 
 namespace Uttambsolutionslimitedvehicles.Controllers
 {
@@ -7,5 +8,66 @@ namespace Uttambsolutionslimitedvehicles.Controllers
     [ApiController]
     public class UttambsolutionslimitedvehiclemodelController : ControllerBase
     {
+        private readonly UttambsolutionslimitedvehicleDbContext _vehicleDbContext;
+
+        public UttambsolutionslimitedvehiclemodelController(UttambsolutionslimitedvehicleDbContext vehicleDbContext)
+        {
+            _vehicleDbContext = vehicleDbContext;
+        }
+
+        // Get all roles
+        [HttpGet]
+        public ActionResult<IEnumerable<Uttambsolutionslimitedvehiclemodel>> Get()
+        {
+            var vehicleModels = _vehicleDbContext.Uttambsolutionslimitedvehiclemodels;
+            return Ok(vehicleModels);
+        }
+
+        // Get a role by ID, including its associated permissions
+        [HttpGet("{Vehiclemodelid:int}")]
+        public async Task<ActionResult<Uttambsolutionslimitedvehiclemodel>> Get(int Vehiclemodelid)
+        {
+            var vehicleModel = await _vehicleDbContext.Uttambsolutionslimitedvehiclemodels.FindAsync(Vehiclemodelid);
+
+            if (vehicleModel == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(vehicleModel);
+        }
+
+        // Create a new model
+        [HttpPost]
+        public async Task<ActionResult> Create(Uttambsolutionslimitedvehiclemodel vehicleModel)
+        {
+            await _vehicleDbContext.Uttambsolutionslimitedvehiclemodels.AddAsync(vehicleModel);
+            await _vehicleDbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        // Update an existing model
+        [HttpPut]
+        public async Task<ActionResult> Update(Uttambsolutionslimitedvehiclemodel vehicleModel)
+        {
+            _vehicleDbContext.Uttambsolutionslimitedvehiclemodels.Update(vehicleModel);
+            await _vehicleDbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        // Delete a model 
+        [HttpDelete("{Vehiclemodelid:int}")]
+        public async Task<ActionResult> Delete(int Vehiclemodelid)
+        {
+            var vehicleModel = await _vehicleDbContext.Uttambsolutionslimitedvehiclemodels.FindAsync(Vehiclemodelid);
+            if (vehicleModel == null)
+            {
+                return NotFound();
+            }
+            // Remove the model
+            _vehicleDbContext.Uttambsolutionslimitedvehiclemodels.Remove(vehicleModel);
+            await _vehicleDbContext.SaveChangesAsync();
+            return NoContent();
+        }
     }
 }
