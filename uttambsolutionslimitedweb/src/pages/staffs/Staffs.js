@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
+import Swal from 'sweetalert2';
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
@@ -37,7 +38,7 @@ const Staffs = () => {
     // Fetch roles data
     const fetchRoles = async () => {
       try {
-        const response = await fetch("http://localhost:8001/api/roles");
+        const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedrole");
         if (response.ok) {
           const data = await response.json();
           setRoles(data);
@@ -105,22 +106,52 @@ const Staffs = () => {
 
   const handleSaveNewStaff = async () => {
     if (!validateForm()) return;
-
+    const staffData = {
+      staffid: 0, // Assuming new staff gets a staffid of 0
+      firstname:newStaff.firstname,
+      lastname:newStaff.lastname,
+      emailaddress:newStaff.emailaddress,
+      phonenumber:newStaff.phonenumber,
+      passwords: "",
+      passwordhash: "",
+      loginstatus: 2, // Assuming the user is inactive initially
+      confirmemail: true, // Assuming email is confirmed
+      confirmphone: true, // Assuming phone is confirmed
+      changepassword: true, // Assuming the user can change password
+      lastpasswordchange: new Date().toISOString(), // Set current date-time
+      roleid: roles.find((roleObj) => roleObj.rolename === newStaff.role)?.roleid || 0, // Get roleid based on the selected role
+      isactive: true,
+      isdeleted: false, // Assuming the user is not deleted initially
+      isdefault: false, // Assuming the staff is not a default user
+      createdby: 0, // Assuming admin ID, or use appropriate value
+      modifiedby: 0, // Initially 0 until updated
+      datecreated: new Date().toISOString(),
+      datemodified: new Date().toISOString(),
+    };
     try {
-      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaffs", {
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newStaff),
+        body: JSON.stringify(staffData),
       });
 
       if (response.ok) {
         const updatedData = await response.json();
         setStaffData((prev) => [...prev, updatedData]);
-        alert("Staff added successfully!");
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Permission added successfully!',
+        });
         handleCloseModal();
+        window.location.reload();
       } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Failed to save permission!',
+        });
         const errorData = await response.json();
         console.error(errorData.message || "Failed to save staff.");
       }
@@ -197,6 +228,7 @@ const Staffs = () => {
                     <Form.Label>Role</Form.Label>
                     <Form.Control
                       as="select"
+                      className="content-justify-center"
                       value={newStaff.role}
                       onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
                     >

@@ -161,6 +161,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         {
             try
             {
+                Encryptdecrypt sec = new Encryptdecrypt();
                 // Example email content
                 string subject = "Welcome to Uttamb Solutions";
                 string body = $@"
@@ -169,7 +170,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             <p><strong>Login Details:</strong></p>
             <ul>
                 <li>Email: {staff.Emailaddress}</li>
-                <li>Password: {staff.Passwords}</li> <!-- Use original password before encryption -->
+                <li>Password: {sec.Decrypt(staff.Passwords, staff.Passwordhash)}</li> <!-- Use original password before encryption -->
             </ul>
             <p>We recommend changing your password upon first login.</p>
             <p>Best Regards,</p>
