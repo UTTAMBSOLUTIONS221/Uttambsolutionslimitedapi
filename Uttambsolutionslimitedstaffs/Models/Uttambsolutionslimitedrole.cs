@@ -28,5 +28,7 @@ namespace Uttambsolutionslimitedstaffs.Models
 
         // Navigation property for the many-to-many relationship with permissions
         public virtual ICollection<Uttambsolutionslimitedrolepermission>? Rolepermissions { get; set; }
+        [NotMapped]
+        public List<int>? Permissionids { get; set; }
     }
 }

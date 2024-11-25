@@ -54,12 +54,12 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             // Add the associated permissions
             if (role.Permissionids != null && role.Permissionids.Count > 0)
             {
-                foreach (var permissionId in role.PermissionIds)
+                foreach (var permissionId in role.Permissionids)
                 {
-                    _roleDbContext.Rolepermissions.Add(new RolePermission
+                    _roleDbContext.Uttambsolutionslimitedrolepermissions.Add(new Uttambsolutionslimitedrolepermission
                     {
-                        RoleId = role.Roleid,
-                        PermissionId = permissionId
+                        Roleid = role.Roleid,
+                        Permissionid = permissionId
                     });
                 }
                 await _roleDbContext.SaveChangesAsync();
@@ -72,31 +72,20 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpPut("{Roleid:int}")]
         public async Task<ActionResult> Update(Uttambsolutionslimitedrole role)
         {
-            var existingRole = await _roleDbContext.Uttambsolutionslimitedroles
-                                                    .Include(r => r.Rolepermissions)
-                                                    .FirstOrDefaultAsync(r => r.Roleid == Roleid);
-
-            if (existingRole == null)
-            {
-                return NotFound();
-            }
-
-            // Update the role properties
-            existingRole.RoleName = role.Rolename;
-            _roleDbContext.Uttambsolutionslimitedroles.Update(existingRole);
+            _roleDbContext.Uttambsolutionslimitedroles.Update(role);
 
             // Remove old permissions
-            _roleDbContext.RolePermissions.RemoveRange(existingRole.RolePermissions);
+            _roleDbContext.Uttambsolutionslimitedrolepermissions.RemoveRange(role.Rolepermissions);
 
             // Add new permissions
-            if (role.PermissionIds != null && role.PermissionIds.Count > 0)
+            if (role.Permissionids != null && role.Permissionids.Count > 0)
             {
-                foreach (var permissionId in role.PermissionIds)
+                foreach (var permissionId in role.Permissionids)
                 {
-                    _roleDbContext.RolePermissions.Add(new Rolepermission
+                    _roleDbContext.Uttambsolutionslimitedrolepermissions.Add(new Uttambsolutionslimitedrolepermission
                     {
-                        RoleId = existingRole.RoleId,
-                        PermissionId = permissionId
+                        Roleid = role.Roleid,
+                        Permissionid = permissionId
                     });
                 }
             }
@@ -120,7 +109,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             }
 
             // Remove the associated permissions
-            _roleDbContext.Rolepermissions.RemoveRange(role.Rolepermissions);
+            _roleDbContext.Uttambsolutionslimitedrolepermissions.RemoveRange(role.Rolepermissions);
 
             // Remove the role
             _roleDbContext.Uttambsolutionslimitedroles.Remove(role);
