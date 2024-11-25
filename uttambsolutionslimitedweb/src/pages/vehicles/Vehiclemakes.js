@@ -3,7 +3,7 @@ import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
 import Swal from 'sweetalert2';
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { Modal, Button, Form, Row } from "react-bootstrap";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Vehiclemakes = () => {

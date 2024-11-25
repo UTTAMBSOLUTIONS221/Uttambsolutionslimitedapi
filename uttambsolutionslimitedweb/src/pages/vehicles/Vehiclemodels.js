@@ -1,579 +1,274 @@
 import React, { useEffect, useState } from "react";
-import $ from 'jquery';
-import 'datatables.net-bs4'; // DataTables Bootstrap 4 integration
-import 'datatables.net-bs4/css/dataTables.bootstrap4.css'; // DataTables CSS for Bootstrap 4
+import $ from "jquery";
+import "datatables.net-bs4";
+import "datatables.net-bs4/css/dataTables.bootstrap4.css";
+import Swal from 'sweetalert2';
+import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Vehiclemodels = () => {
-  useEffect(() => {
-    // Ensure DataTable works after the component mounts
-    if ($.fn.dataTable) {
-      $("#vehicleModelTable").DataTable();
-    } else {
-      console.error("DataTable plugin is not available");
-    }
-  }, []);
-  // Modal state
+  const [vehicleModelsData, setVehicleModelsData] = useState([]);
+  const [newVehicleModel, setNewVehicleModel] = useState({
+    vehiclemodelname: ""
+  });
   const [showModal, setShowModal] = useState(false);
+  const [editMode, setEditMode] = useState(false); // State to determine if we're editing
+  const [currentVehicleModelId, setCurrentVehicleModelId] = useState(null); // Store the ID of the permission being edited
+  const [errors, setErrors] = useState({});
 
-  const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  useEffect(() => {
+    // Fetch vehicle Models data
+    const fetchVehicleModelsData = async () => {
+      try {
+        const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel");
+        if (response.ok) {
+          const data = await response.json();
+          setVehicleModelsData(data);
+        } else {
+          console.error("Failed to fetch vehicle Models data");
+        }
+      } catch (error) {
+        console.error("Error fetching vehicle Models data:", error);
+      }
+    };
+
+    fetchVehicleModelsData();
+  }, []);
+
+  useEffect(() => {
+    if ($.fn.DataTable.isDataTable("#vehicleModelTable")) {
+      $("#vehicleModelTable").DataTable().destroy();
+    }
+
+    $("#vehicleModelTable").DataTable({
+      data: vehicleModelsData,
+      columns: [
+        { data: "vehiclemodelname", title: "Model Name" },
+        {
+          data: null,
+          title: "Actions",
+          orderable: false,
+          className: "text-right",  
+          render: (data, type, row) => {
+            return ` 
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-info btn-xs" data-id="${row.vehiclemodelid}">Edit</button>
+                <button class="btn btn-danger btn-xs ml-2" data-id="${row.vehiclemodelid}">Delete</button>
+             </div>
+            `;
+          },
+          createdCell: (cell, cellData, rowData) => {
+            // Add event listeners after rendering the table
+            $(cell).find(".btn-info").on("click", () => editVehicleModel(rowData.vehiclemodelid));
+            $(cell).find(".btn-danger").on("click", () => deleteVehicleModel(rowData.vehiclemodelid));
+          },
+        },
+      ],
+    });
+  }, [vehicleModelsData]);
+
+  const handleShowModal = () => {
+    setEditMode(false);  // Reset to add mode
+    setNewVehicleModel({
+        vehiclemodelname: "",
+    });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setErrors({});
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!newVehicleModel.vehiclemodelname.trim()) newErrors.vehiclemodelname = "Vehicle model name is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSaveNewVehicleModel = async () => {
+    if (!validateForm()) return;
+
+    try {
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newVehicleModel),
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Vehicle model added successfully!',
+        });
+        handleCloseModal();
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Failed to save vehicle model!',
+        });
+      }
+    } catch (error) {
+      console.error("Error saving vehicle model:", error);
+    }
+  };
+
+  // Edit Permission Handler using GET
+  const editVehicleModel = async (vehiclemodelId) => {
+    console.log(vehiclemodelId);
+    setEditMode(true); // Set editing mode
+    setCurrentVehicleModelId(vehiclemodelId); // Set the current permission ID
+
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel/${vehiclemodelId}`);
+      if (response.ok) {
+        const vehicleModelToEdit = await response.json();
+        setNewVehicleModel({
+            vehiclemodelname: vehicleModelToEdit.vehiclemodelname,
+        });
+        setShowModal(true);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch vehicle model details!',
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching vehicle model details:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error fetching vehicle model details!',
+      });
+    }
+  };
+
+  const handleSaveUpdatedVehicleModel = async () => {
+    if (!validateForm()) return;
+  
+    // Add the current permission ID to the updated permission object
+    const updatedVehicleModel = { 
+      ...newVehicleModel, 
+      vehiclemodelid: currentVehicleModelId // Ensure the correct ID is included
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
+        method: "PUT", // Use PUT for updates
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedVehicleModel), // Send the updated permission object
+      });
+  
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Vehicle model updated successfully!',
+        });
+        handleCloseModal();
+        window.location.reload();  // Refresh the page to reflect changes
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Failed to update vehicle model!',
+        });
+      }
+    } catch (error) {
+      console.error("Error updating vehicle model:", error);
+    }
+  };
+  
+  // Delete Permission Handler (Assuming API delete endpoint)
+  const deleteVehicleModel = async (vehiclemodelId) => {
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel/${vehiclemodelId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Vehicle model deleted successfully!',
+        });
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to delete vehicle model!',
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting vehicle model:", error);
+    }
+  };
 
   return (
-  <div>
-    <div className="card card-outline card-info">
-      <div className="card-header">
-         <div className="row">
-            <div className="col-lg-6 col-md-6 col-sm-12">
-                <h4 className="card-title text-uppercase fw-bold text-custom">Vehicle Models</h4>
-            </div>
-            <div className="col-lg-6 col-md-6 col-sm-12">
-                <button className="btn btn-info btn-sm text-uppercase fw-bold float-right" onClick={handleShowModal} > Add Model </button>
-            </div>
-         </div>
-      </div>
-      <div className="card-body table-responsive">
-        <table id="vehicleModelTable" className="table table-bordered table-sm table-striped">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Office</th>
-              <th>Age</th>
-              <th>Start date</th>
-              <th>Salary</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Tiger Nixon</td>
-              <td>System Architect</td>
-              <td>Edinburgh</td>
-              <td>61</td>
-              <td>2011-04-25</td>
-              <td>$320,800</td>
-            </tr>
-            <tr>
-              <td>Garrett Winters</td>
-              <td>Accountant</td>
-              <td>Tokyo</td>
-              <td>63</td>
-              <td>2011-07-25</td>
-              <td>$170,750</td>
-            </tr>
-            <tr>
-              <td>Ashton Cox</td>
-              <td>Junior Technical Author</td>
-              <td>San Francisco</td>
-              <td>66</td>
-              <td>2009-01-12</td>
-              <td>$86,000</td>
-            </tr>
-            <tr>
-              <td>Cedric Kelly</td>
-              <td>Senior Javascript Developer</td>
-              <td>Edinburgh</td>
-              <td>22</td>
-              <td>2012-03-29</td>
-              <td>$433,060</td>
-            </tr>
-            <tr>
-              <td>Airi Satou</td>
-              <td>Accountant</td>
-              <td>Tokyo</td>
-              <td>33</td>
-              <td>2008-11-28</td>
-              <td>$162,700</td>
-            </tr>
-            <tr>
-              <td>Brielle Williamson</td>
-              <td>Integration Specialist</td>
-              <td>New York</td>
-              <td>61</td>
-              <td>2012-12-02</td>
-              <td>$372,000</td>
-            </tr>
-            <tr>
-              <td>Herrod Chandler</td>
-              <td>Sales Assistant</td>
-              <td>San Francisco</td>
-              <td>59</td>
-              <td>2012-08-06</td>
-              <td>$137,500</td>
-            </tr>
-            <tr>
-              <td>Rhona Davidson</td>
-              <td>Integration Specialist</td>
-              <td>Tokyo</td>
-              <td>55</td>
-              <td>2010-10-14</td>
-              <td>$327,900</td>
-            </tr>
-            <tr>
-              <td>Colleen Hurst</td>
-              <td>Javascript Developer</td>
-              <td>San Francisco</td>
-              <td>39</td>
-              <td>2009-09-15</td>
-              <td>$205,500</td>
-            </tr>
-            <tr>
-              <td>Sonya Frost</td>
-              <td>Software Engineer</td>
-              <td>Edinburgh</td>
-              <td>23</td>
-              <td>2008-12-13</td>
-              <td>$103,600</td>
-            </tr>
-            <tr>
-              <td>Jena Gaines</td>
-              <td>Office Manager</td>
-              <td>London</td>
-              <td>30</td>
-              <td>2008-12-19</td>
-              <td>$90,560</td>
-            </tr>
-            <tr>
-              <td>Quinn Flynn</td>
-              <td>Support Lead</td>
-              <td>Edinburgh</td>
-              <td>22</td>
-              <td>2013-03-03</td>
-              <td>$342,000</td>
-            </tr>
-            <tr>
-              <td>Charde Marshall</td>
-              <td>Regional Director</td>
-              <td>San Francisco</td>
-              <td>36</td>
-              <td>2008-10-16</td>
-              <td>$470,600</td>
-            </tr>
-            <tr>
-              <td>Haley Kennedy</td>
-              <td>Senior Marketing Designer</td>
-              <td>London</td>
-              <td>43</td>
-              <td>2012-12-18</td>
-              <td>$313,500</td>
-            </tr>
-            <tr>
-              <td>Tatyana Fitzpatrick</td>
-              <td>Regional Director</td>
-              <td>London</td>
-              <td>19</td>
-              <td>2010-03-17</td>
-              <td>$385,750</td>
-            </tr>
-            <tr>
-              <td>Michael Silva</td>
-              <td>Marketing Designer</td>
-              <td>London</td>
-              <td>66</td>
-              <td>2012-11-27</td>
-              <td>$198,500</td>
-            </tr>
-            <tr>
-              <td>Paul Byrd</td>
-              <td>Chief Financial Officer (CFO)</td>
-              <td>New York</td>
-              <td>64</td>
-              <td>2010-06-09</td>
-              <td>$725,000</td>
-            </tr>
-            <tr>
-              <td>Gloria Little</td>
-              <td>Systems Administrator</td>
-              <td>New York</td>
-              <td>59</td>
-              <td>2009-04-10</td>
-              <td>$237,500</td>
-            </tr>
-            <tr>
-              <td>Bradley Greer</td>
-              <td>Software Engineer</td>
-              <td>London</td>
-              <td>41</td>
-              <td>2012-10-13</td>
-              <td>$132,000</td>
-            </tr>
-            <tr>
-              <td>Dai Rios</td>
-              <td>Personnel Lead</td>
-              <td>Edinburgh</td>
-              <td>35</td>
-              <td>2012-09-26</td>
-              <td>$217,500</td>
-            </tr>
-            <tr>
-              <td>Jenette Caldwell</td>
-              <td>Development Lead</td>
-              <td>New York</td>
-              <td>30</td>
-              <td>2011-09-03</td>
-              <td>$345,000</td>
-            </tr>
-            <tr>
-              <td>Yuri Berry</td>
-              <td>Chief Marketing Officer (CMO)</td>
-              <td>New York</td>
-              <td>40</td>
-              <td>2009-06-25</td>
-              <td>$675,000</td>
-            </tr>
-            <tr>
-              <td>Caesar Vance</td>
-              <td>Pre-Sales Support</td>
-              <td>New York</td>
-              <td>21</td>
-              <td>2011-12-12</td>
-              <td>$106,450</td>
-            </tr>
-            <tr>
-              <td>Doris Wilder</td>
-              <td>Sales Assistant</td>
-              <td>Sydney</td>
-              <td>23</td>
-              <td>2010-09-20</td>
-              <td>$85,600</td>
-            </tr>
-            <tr>
-              <td>Angelica Ramos</td>
-              <td>Chief Executive Officer (CEO)</td>
-              <td>London</td>
-              <td>47</td>
-              <td>2009-10-09</td>
-              <td>$1,200,000</td>
-            </tr>
-            <tr>
-              <td>Gavin Joyce</td>
-              <td>Developer</td>
-              <td>Edinburgh</td>
-              <td>42</td>
-              <td>2010-12-22</td>
-              <td>$92,575</td>
-            </tr>
-            <tr>
-              <td>Jennifer Chang</td>
-              <td>Regional Director</td>
-              <td>Singapore</td>
-              <td>28</td>
-              <td>2010-11-14</td>
-              <td>$357,650</td>
-            </tr>
-            <tr>
-              <td>Brenden Wagner</td>
-              <td>Software Engineer</td>
-              <td>San Francisco</td>
-              <td>28</td>
-              <td>2011-06-07</td>
-              <td>$206,850</td>
-            </tr>
-            <tr>
-              <td>Fiona Green</td>
-              <td>Chief Operating Officer (COO)</td>
-              <td>San Francisco</td>
-              <td>48</td>
-              <td>2010-03-11</td>
-              <td>$850,000</td>
-            </tr>
-            <tr>
-              <td>Shou Itou</td>
-              <td>Regional Marketing</td>
-              <td>Tokyo</td>
-              <td>20</td>
-              <td>2011-08-14</td>
-              <td>$163,000</td>
-            </tr>
-            <tr>
-              <td>Michelle House</td>
-              <td>Integration Specialist</td>
-              <td>Sydney</td>
-              <td>37</td>
-              <td>2011-06-02</td>
-              <td>$95,400</td>
-            </tr>
-            <tr>
-              <td>Suki Burks</td>
-              <td>Developer</td>
-              <td>London</td>
-              <td>53</td>
-              <td>2009-10-22</td>
-              <td>$114,500</td>
-            </tr>
-            <tr>
-              <td>Prescott Bartlett</td>
-              <td>Technical Author</td>
-              <td>London</td>
-              <td>27</td>
-              <td>2011-05-07</td>
-              <td>$145,000</td>
-            </tr>
-            <tr>
-              <td>Gavin Cortez</td>
-              <td>Team Leader</td>
-              <td>San Francisco</td>
-              <td>22</td>
-              <td>2008-10-26</td>
-              <td>$235,500</td>
-            </tr>
-            <tr>
-              <td>Martena Mccray</td>
-              <td>Post-Sales support</td>
-              <td>Edinburgh</td>
-              <td>46</td>
-              <td>2011-03-09</td>
-              <td>$324,050</td>
-            </tr>
-            <tr>
-              <td>Unity Butler</td>
-              <td>Marketing Designer</td>
-              <td>San Francisco</td>
-              <td>47</td>
-              <td>2009-12-09</td>
-              <td>$85,675</td>
-            </tr>
-            <tr>
-              <td>Howard Hatfield</td>
-              <td>Office Manager</td>
-              <td>San Francisco</td>
-              <td>51</td>
-              <td>2008-12-16</td>
-              <td>$164,500</td>
-            </tr>
-            <tr>
-              <td>Hope Fuentes</td>
-              <td>Secretary</td>
-              <td>San Francisco</td>
-              <td>41</td>
-              <td>2010-02-12</td>
-              <td>$109,850</td>
-            </tr>
-            <tr>
-              <td>Vivian Harrell</td>
-              <td>Financial Controller</td>
-              <td>San Francisco</td>
-              <td>62</td>
-              <td>2009-02-14</td>
-              <td>$452,500</td>
-            </tr>
-            <tr>
-              <td>Timothy Mooney</td>
-              <td>Office Manager</td>
-              <td>London</td>
-              <td>37</td>
-              <td>2008-12-11</td>
-              <td>$136,200</td>
-            </tr>
-            <tr>
-              <td>Jackson Bradshaw</td>
-              <td>Director</td>
-              <td>New York</td>
-              <td>65</td>
-              <td>2008-09-26</td>
-              <td>$645,750</td>
-            </tr>
-            <tr>
-              <td>Olivia Liang</td>
-              <td>Support Engineer</td>
-              <td>Singapore</td>
-              <td>64</td>
-              <td>2011-02-03</td>
-              <td>$234,500</td>
-            </tr>
-            <tr>
-              <td>Bruno Nash</td>
-              <td>Software Engineer</td>
-              <td>London</td>
-              <td>38</td>
-              <td>2011-05-03</td>
-              <td>$163,500</td>
-            </tr>
-            <tr>
-              <td>Sakura Yamamoto</td>
-              <td>Support Engineer</td>
-              <td>Tokyo</td>
-              <td>37</td>
-              <td>2009-08-19</td>
-              <td>$139,575</td>
-            </tr>
-            <tr>
-              <td>Thor Walton</td>
-              <td>Developer</td>
-              <td>New York</td>
-              <td>61</td>
-              <td>2013-08-11</td>
-              <td>$98,540</td>
-            </tr>
-            <tr>
-              <td>Finn Camacho</td>
-              <td>Support Engineer</td>
-              <td>San Francisco</td>
-              <td>47</td>
-              <td>2009-07-07</td>
-              <td>$87,500</td>
-            </tr>
-            <tr>
-              <td>Serge Baldwin</td>
-              <td>Data Coordinator</td>
-              <td>Singapore</td>
-              <td>64</td>
-              <td>2012-04-09</td>
-              <td>$138,575</td>
-            </tr>
-            <tr>
-              <td>Zenaida Frank</td>
-              <td>Software Engineer</td>
-              <td>New York</td>
-              <td>63</td>
-              <td>2010-01-04</td>
-              <td>$125,250</td>
-            </tr>
-            <tr>
-              <td>Zorita Serrano</td>
-              <td>Software Engineer</td>
-              <td>San Francisco</td>
-              <td>56</td>
-              <td>2012-06-01</td>
-              <td>$115,000</td>
-            </tr>
-            <tr>
-              <td>Jennifer Acosta</td>
-              <td>Junior Javascript Developer</td>
-              <td>Edinburgh</td>
-              <td>43</td>
-              <td>2013-02-01</td>
-              <td>$75,650</td>
-            </tr>
-            <tr>
-              <td>Cara Stevens</td>
-              <td>Sales Assistant</td>
-              <td>New York</td>
-              <td>46</td>
-              <td>2011-12-06</td>
-              <td>$145,600</td>
-            </tr>
-            <tr>
-              <td>Hermione Butler</td>
-              <td>Regional Director</td>
-              <td>London</td>
-              <td>47</td>
-              <td>2011-03-21</td>
-              <td>$356,250</td>
-            </tr>
-            <tr>
-              <td>Lael Greer</td>
-              <td>Systems Administrator</td>
-              <td>London</td>
-              <td>21</td>
-              <td>2009-02-27</td>
-              <td>$103,500</td>
-            </tr>
-            <tr>
-              <td>Jonas Alexander</td>
-              <td>Developer</td>
-              <td>San Francisco</td>
-              <td>30</td>
-              <td>2010-07-14</td>
-              <td>$86,500</td>
-            </tr>
-            <tr>
-              <td>Shad Decker</td>
-              <td>Regional Director</td>
-              <td>Edinburgh</td>
-              <td>51</td>
-              <td>2008-11-13</td>
-              <td>$183,000</td>
-            </tr>
-            <tr>
-              <td>Michael Bruce</td>
-              <td>Javascript Developer</td>
-              <td>Singapore</td>
-              <td>29</td>
-              <td>2011-06-27</td>
-              <td>$183,000</td>
-            </tr>
-            <tr>
-              <td>Donna Snider</td>
-              <td>Customer Support</td>
-              <td>New York</td>
-              <td>27</td>
-              <td>2011-01-25</td>
-              <td>$112,000</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Office</th>
-              <th>Age</th>
-              <th>Start date</th>
-              <th>Salary</th>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
-
-    {/* Modal */}
-    {showModal && (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Create New Vehicle Model</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleCloseModal}
-                ></button>
-              </div>
-              <div className="modal-body">
-                {/* Add form inputs for new item creation */}
-                <form>
-                  <div className="mb-3">
-                    <label htmlFor="modelName" className="form-label">
-                      Model Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="modelName"
-                      placeholder="Enter model name"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="modelPosition" className="form-label">
-                      Position
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="modelPosition"
-                      placeholder="Enter position"
-                    />
-                  </div>
-                  {/* Add more fields as needed */}
-                </form>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button type="button" className="btn btn-primary">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
+    <div>
+      <div className="card card-outline card-info">
+        <div className="card-header">
+          <h4 className="card-title">Vehicle Models</h4>
+          <Button className="float-right btn-info btn-sm" onClick={handleShowModal}>
+            <FaPlus /> Add Model
+          </Button>
         </div>
+        <div className="card-body">
+          <table id="vehicleModelTable" className="table table-bordered table-striped table-sm"></table>
+        </div>
+      </div>
+
+      {showModal && (
+        <Modal
+          show={showModal}
+          onHide={handleCloseModal}
+          backdrop="static"
+          keyboard={false}
+          centered
+          className="modal-custom"
+        >
+          <Modal.Header closeButton className="modal-header-custom">
+            <Modal.Title>{editMode ? 'Edit Model' : 'Add Model'}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="modal-body-custom">
+            <Form>
+              <Row className="mb-3">
+              <Form.Group>
+                    <Form.Label className="form-label-custom">Model Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newVehicleModel.vehiclemodelname}
+                      onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })}
+                      className="form-control-custom"
+                    />
+                    {errors.vehiclemodelname && <small className="text-danger">{errors.vehiclemodelname}</small>}
+                  </Form.Group>
+              </Row>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer className="modal-footer-custom">
+            <Button variant="secondary" onClick={handleCloseModal} className="btn-custom">
+              <FaTimes /> Cancel
+            </Button>
+            <Button
+              variant="info"
+              onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel}
+              className="btn-custom"
+            >
+              <FaSave /> {editMode ? 'Update Vehicle Model' : 'Add Vehicle Model'}
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
-  </div>
+    </div>
   );
 };
-  export default Vehiclemodels;
+
+export default Vehiclemodels;
