@@ -50,10 +50,13 @@ const Permissions = () => {
           data: null,
           title: "Actions",
           orderable: false,
+          className: "text-right",  
           render: (data, type, row) => {
             return ` 
-              <button class="btn btn-info btn-xs" data-id="${row.permissionid}">Edit</button>
-              <button class="btn btn-danger btn-xs" data-id="${row.permissionid}">Delete</button>
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-info btn-xs" data-id="${row.permissionid}">Edit</button>
+                <button class="btn btn-danger btn-xs ml-2" data-id="${row.permissionid}">Delete</button>
+             </div>
             `;
           },
           createdCell: (cell, cellData, rowData) => {
@@ -156,7 +159,7 @@ const Permissions = () => {
     // Add the current permission ID to the updated permission object
     const updatedPermission = { 
       ...newPermission, 
-      permissionid: currentPermissionId // Ensure the correct ID is included
+      id: currentPermissionId // Ensure the correct ID is included
     };
   
     try {
