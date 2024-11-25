@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
+import Swal from 'sweetalert2';
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
@@ -86,11 +87,19 @@ const Permissions = () => {
       });
 
       if (response.ok) {
-        const updatedData = await response.json();
-        setPermissionsData((prev) => [...prev, updatedData]);
-        alert("Permission added successfully!");
-        handleCloseModal();
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Permission added successfully!',
+          });
+          handleCloseModal();
+          window.location.reload();
       } else {
+        Swal.fire({
+            icon: 'danger',
+            title: 'Warning',
+            text: 'Failed to save permission!',
+          });
         const errorData = await response.json();
         console.error(errorData.message || "Failed to save permission.");
       }
