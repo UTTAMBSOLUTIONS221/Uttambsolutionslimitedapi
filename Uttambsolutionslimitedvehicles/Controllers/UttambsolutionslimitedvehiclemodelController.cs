@@ -35,8 +35,6 @@ namespace Uttambsolutionslimitedvehicles.Controllers
         .ToList();
 
             return Ok(vehicleModelsWithMake);
-            var vehicleModels = _vehicleDbContext.Uttambsolutionslimitedvehiclemodels;
-            return Ok(vehicleModels);
         }
 
         // Get a role by ID, including its associated permissions
