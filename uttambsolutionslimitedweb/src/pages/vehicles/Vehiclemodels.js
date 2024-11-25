@@ -59,6 +59,7 @@ const Vehiclemodels = () => {
     $("#vehicleModelTable").DataTable({
       data: vehicleModelsData,
       columns: [
+        { data: "Vehiclemakename", title: "Make Name" },
         { data: "vehiclemodelname", title: "Model Name" },
         {
           data: null,

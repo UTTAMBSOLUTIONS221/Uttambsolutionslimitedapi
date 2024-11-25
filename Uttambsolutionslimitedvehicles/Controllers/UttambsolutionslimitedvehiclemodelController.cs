@@ -19,6 +19,22 @@ namespace Uttambsolutionslimitedvehicles.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Uttambsolutionslimitedvehiclemodel>> Get()
         {
+            var vehicleModelsWithMake = _vehicleDbContext.Uttambsolutionslimitedvehiclemodels
+        .Join(
+            _vehicleDbContext.Uttambsolutionslimitedvehiclemakes,
+            model => model.Vehiclemakeid, // Foreign key in the models table
+            make => make.Vehiclemakeid,  // Primary key in the makes table
+            (model, make) => new
+            {
+                ModelId = model.Vehiclemodelid,
+                ModelName = model.Vehiclemodelname,
+                MakeId = make.Vehiclemakeid,
+                MakeName = make.Vehiclemakename
+            }
+        )
+        .ToList();
+
+            return Ok(vehicleModelsWithMake);
             var vehicleModels = _vehicleDbContext.Uttambsolutionslimitedvehiclemodels;
             return Ok(vehicleModels);
         }
