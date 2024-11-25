@@ -2,40 +2,63 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
+import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Staffs = () => {
   const [staffData, setStaffData] = useState([]);
-  const [staffName, setStaffName] = useState("");
-  const [staffRole, setStaffRole] = useState("");
-  const [error, setError] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [newStaff, setNewStaff] = useState({
+    firstname: "",
+    lastname: "",
+    phonenumber: "",
+    emailaddress: "",
+    role: "",
+  });
   const [showModal, setShowModal] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // Fetch all data
-    const fetchData = async () => {
+    // Fetch staff data
+    const fetchStaffData = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff");
         if (response.ok) {
           const data = await response.json();
           setStaffData(data);
         } else {
-          console.error("Failed to fetch data");
+          console.error("Failed to fetch staff data");
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching staff data:", error);
       }
     };
 
-    fetchData();
+    // Fetch roles data
+    const fetchRoles = async () => {
+      try {
+        const response = await fetch("http://localhost:8001/api/roles");
+        if (response.ok) {
+          const data = await response.json();
+          setRoles(data);
+        } else {
+          console.error("Failed to fetch roles");
+        }
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    fetchStaffData();
+    fetchRoles();
   }, []);
 
   useEffect(() => {
-    // Initialize DataTable
     if ($.fn.DataTable.isDataTable("#staffsTable")) {
       $("#staffsTable").DataTable().destroy();
     }
 
-    const table = $("#staffsTable").DataTable({
+    $("#staffsTable").DataTable({
       data: staffData,
       columns: [
         { data: "firstname", title: "First Name" },
@@ -48,59 +71,61 @@ const Staffs = () => {
           title: "Actions",
           orderable: false,
           render: (data, type, row) => `
-            <button class="btn btn-info btn-xs" onclick="editStaff(${row.id})">Edit</button>
-            <button class="btn btn-danger btn-xs" onclick="deleteStaff(${row.id})">Delete</button>
+            <button class="btn btn-info btn-xs">Edit</button>
+            <button class="btn btn-danger btn-xs">Delete</button>
           `,
         },
       ],
     });
-
-    return () => {
-      table.destroy();
-    };
   }, [staffData]);
 
   const handleShowModal = () => setShowModal(true);
   const handleCloseModal = () => {
     setShowModal(false);
-    setError("");
-    setStaffName("");
-    setStaffRole("");
+    setNewStaff({
+      firstname: "",
+      lastname: "",
+      phonenumber: "",
+      emailaddress: "",
+      role: "",
+    });
+    setErrors({});
   };
 
-  const handleSaveChanges = async () => {
-    if (!staffName.trim() || !staffRole.trim()) {
-      setError("Both staff name and role are required.");
-      return;
-    }
+  const validateForm = () => {
+    const newErrors = {};
+    if (!newStaff.firstname.trim()) newErrors.firstname = "First name is required.";
+    if (!newStaff.lastname.trim()) newErrors.lastname = "Last name is required.";
+    if (!newStaff.phonenumber.trim()) newErrors.phonenumber = "Phone number is required.";
+    if (!newStaff.emailaddress.trim()) newErrors.emailaddress = "Email is required.";
+    if (!newStaff.role.trim()) newErrors.role = "Role is required.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSaveNewStaff = async () => {
+    if (!validateForm()) return;
 
     try {
-      const response = await fetch(
-        "http://localhost:8001/api/Uttambsolutionslimitedstaffs", // Replace with POST API endpoint
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: staffName,
-            role: staffRole,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaffs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStaff),
+      });
 
       if (response.ok) {
-        alert("Staff added successfully!");
-        // Reload data from API
         const updatedData = await response.json();
         setStaffData((prev) => [...prev, updatedData]);
+        alert("Staff added successfully!");
         handleCloseModal();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Failed to save staff.");
+        console.error(errorData.message || "Failed to save staff.");
       }
-    } catch (err) {
-      setError(`Network error: ${err.message}`);
+    } catch (error) {
+      console.error("Error saving staff:", error.message);
     }
   };
 
@@ -108,85 +133,104 @@ const Staffs = () => {
     <div>
       <div className="card card-outline card-info">
         <div className="card-header">
-          <div className="row">
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <h4 className="card-title text-uppercase fw-bold text-custom">
-                Staffs
-              </h4>
-            </div>
-            <div className="col-lg-6 col-md-6 col-sm-12">
-              <button
-                className="btn btn-info btn-sm text-uppercase fw-bold float-right"
-                onClick={handleShowModal}
-              >
-                Add Staff
-              </button>
-            </div>
-          </div>
+          <h4 className="card-title">Staffs</h4>
+          <Button className="float-right btn-info btn-sm" onClick={handleShowModal}>
+            <FaPlus /> Add Staff
+          </Button>
         </div>
-        <div className="card-body table-responsive">
-          <table
-            id="staffsTable"
-            className="table table-bordered table-sm table-striped"
-          ></table>
+        <div className="card-body">
+          <table id="staffsTable" className="table table-bordered table-striped table-sm"></table>
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && (
-        <div className="modal fade show d-block" style={{ background: "#000000aa" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add Staff</h5>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={handleCloseModal}
-                >
-                  &times;
-                </button>
-              </div>
-              <div className="modal-body">
-                {error && <div className="alert alert-danger">{error}</div>}
-                <div className="form-group">
-                  <label htmlFor="staffName">Staff Name</label>
-                  <input
-                    type="text"
-                    id="staffName"
-                    className="form-control"
-                    value={staffName}
-                    onChange={(e) => setStaffName(e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="staffRole">Role</label>
-                  <input
-                    type="text"
-                    id="staffRole"
-                    className="form-control"
-                    value={staffRole}
-                    onChange={(e) => setStaffRole(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleSaveChanges}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Modal
+          show={showModal}
+          onHide={handleCloseModal}
+          backdrop="static"
+          keyboard={false}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Add Staff</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Row>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>First Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.firstname}
+                      onChange={(e) => setNewStaff({ ...newStaff, firstname: e.target.value })}
+                    />
+                    {errors.firstname && <small className="text-danger">{errors.firstname}</small>}
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Last Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.lastname}
+                      onChange={(e) => setNewStaff({ ...newStaff, lastname: e.target.value })}
+                    />
+                    {errors.lastname && <small className="text-danger">{errors.lastname}</small>}
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Phone Number</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newStaff.phonenumber}
+                      onChange={(e) => setNewStaff({ ...newStaff, phonenumber: e.target.value })}
+                    />
+                    {errors.phonenumber && <small className="text-danger">{errors.phonenumber}</small>}
+                  </Form.Group>
+                </Col>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Role</Form.Label>
+                    <Form.Control
+                      as="select"
+                      value={newStaff.role}
+                      onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
+                    >
+                      <option value="">Select Role</option>
+                      {roles.map((role) => (
+                        <option key={role.roleid} value={role.rolename}>
+                          {role.rolename}
+                        </option>
+                      ))}
+                    </Form.Control>
+                    {errors.role && <small className="text-danger">{errors.role}</small>}
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Form.Group>
+                <Form.Label>Email</Form.Label>
+                <Form.Control
+                  type="email"
+                  value={newStaff.emailaddress}
+                  onChange={(e) => setNewStaff({ ...newStaff, emailaddress: e.target.value })}
+                />
+                {errors.emailaddress && <small className="text-danger">{errors.emailaddress}</small>}
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
+              <FaTimes /> Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSaveNewStaff}>
+              <FaSave /> Add Staff
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
     </div>
   );
