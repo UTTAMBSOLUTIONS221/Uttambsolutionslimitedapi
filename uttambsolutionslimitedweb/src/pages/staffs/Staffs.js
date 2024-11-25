@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
+import { FaPlus, FaSave, FaTimes, FaEdit } from "react-icons/fa";
 
 const Staffs = () => {
   const [staffData, setStaffData] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [currentStaff, setCurrentStaff] = useState(null);
   const [newStaff, setNewStaff] = useState({
     firstname: "",
     lastname: "",
@@ -17,10 +18,11 @@ const Staffs = () => {
     role: "",
   });
   const [showModal, setShowModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // Fetch staff and roles data on component load
   useEffect(() => {
-    // Fetch staff data
     const fetchStaffData = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff");
@@ -35,7 +37,6 @@ const Staffs = () => {
       }
     };
 
-    // Fetch roles data
     const fetchRoles = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedrole");
@@ -54,6 +55,7 @@ const Staffs = () => {
     fetchRoles();
   }, []);
 
+  // Initialize DataTable
   useEffect(() => {
     if ($.fn.DataTable.isDataTable("#staffsTable")) {
       $("#staffsTable").DataTable().destroy();
@@ -72,15 +74,25 @@ const Staffs = () => {
           title: "Actions",
           orderable: false,
           render: (data, type, row) => `
-            <button class="btn btn-info btn-xs">Edit</button>
-            <button class="btn btn-danger btn-xs">Delete</button>
+            <button class="btn btn-info btn-xs edit-btn">Edit</button>
+            <button class="btn btn-danger btn-xs delete-btn">Delete</button>
           `,
         },
       ],
     });
+
+    $("#staffsTable tbody").on("click", ".edit-btn", function () {
+      const rowData = $("#staffsTable").DataTable().row($(this).parents("tr")).data();
+      handleEditStaff(rowData);
+    });
   }, [staffData]);
 
-  const handleShowModal = () => setShowModal(true);
+  // Show modal for adding or editing staff
+  const handleShowModal = () => {
+    setShowModal(true);
+    setErrors({});
+  };
+
   const handleCloseModal = () => {
     setShowModal(false);
     setNewStaff({
@@ -90,7 +102,22 @@ const Staffs = () => {
       emailaddress: "",
       role: "",
     });
-    setErrors({});
+    setCurrentStaff(null);
+    setIsEdit(false);
+  };
+
+  // Handle Edit
+  const handleEditStaff = (staff) => {
+    setIsEdit(true);
+    setCurrentStaff(staff);
+    setNewStaff({
+      firstname: staff.firstname,
+      lastname: staff.lastname,
+      phonenumber: staff.phonenumber,
+      emailaddress: staff.emailaddress,
+      role: roles.find((role) => role.roleid === staff.roleid)?.rolename || "",
+    });
+    handleShowModal();
   };
 
   const validateForm = () => {
@@ -104,59 +131,48 @@ const Staffs = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveNewStaff = async () => {
+  // Save or Update Staff
+  const handleSaveStaff = async () => {
     if (!validateForm()) return;
-    const staffData = {
-      staffid: 0, // Assuming new staff gets a staffid of 0
-      firstname:newStaff.firstname,
-      lastname:newStaff.lastname,
-      emailaddress:newStaff.emailaddress,
-      phonenumber:newStaff.phonenumber,
-      passwords: "",
-      passwordhash: "",
-      loginstatus: 2, // Assuming the user is inactive initially
-      confirmemail: true, // Assuming email is confirmed
-      confirmphone: true, // Assuming phone is confirmed
-      changepassword: true, // Assuming the user can change password
-      lastpasswordchange: new Date().toISOString(), // Set current date-time
-      roleid: roles.find((roleObj) => roleObj.rolename === newStaff.role)?.roleid || 0, // Get roleid based on the selected role
-      isactive: true,
-      isdeleted: false, // Assuming the user is not deleted initially
-      isdefault: false, // Assuming the staff is not a default user
-      createdby: 0, // Assuming admin ID, or use appropriate value
-      modifiedby: 0, // Initially 0 until updated
-      datecreated: new Date().toISOString(),
-      datemodified: new Date().toISOString(),
+    const payload = {
+      ...currentStaff,
+      firstname: newStaff.firstname,
+      lastname: newStaff.lastname,
+      emailaddress: newStaff.emailaddress,
+      phonenumber: newStaff.phonenumber,
+      roleid: roles.find((role) => role.rolename === newStaff.role)?.roleid || 0,
     };
+
     try {
-      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedstaff", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(staffData),
+      const url = `http://localhost:8001/api/Uttambsolutionslimitedstaff${isEdit ? `/${currentStaff.staffid}` : ""}`;
+      const method = isEdit ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         const updatedData = await response.json();
-        setStaffData((prev) => [...prev, updatedData]);
+        setStaffData((prev) =>
+          isEdit
+            ? prev.map((staff) => (staff.staffid === updatedData.staffid ? updatedData : staff))
+            : [...prev, updatedData]
+        );
         Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Permission added successfully!',
+          icon: "success",
+          title: isEdit ? "Staff updated successfully!" : "Staff added successfully!",
         });
         handleCloseModal();
-        window.location.reload();
       } else {
         Swal.fire({
-          icon: 'warning',
-          title: 'Failed to save permission!',
+          icon: "error",
+          title: "Failed to save staff!",
         });
-        const errorData = await response.json();
-        console.error(errorData.message || "Failed to save staff.");
       }
     } catch (error) {
-      console.error("Error saving staff:", error.message);
+      console.error("Error saving staff:", error);
     }
   };
 
@@ -175,15 +191,9 @@ const Staffs = () => {
       </div>
 
       {showModal && (
-        <Modal
-          show={showModal}
-          onHide={handleCloseModal}
-          backdrop="static"
-          keyboard={false}
-          centered
-        >
+        <Modal show={showModal} onHide={handleCloseModal} backdrop="static" keyboard={false} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Add Staff</Modal.Title>
+            <Modal.Title>{isEdit ? "Edit Staff" : "Add Staff"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
@@ -228,7 +238,6 @@ const Staffs = () => {
                     <Form.Label>Role</Form.Label>
                     <Form.Control
                       as="select"
-                      className="content-justify-center"
                       value={newStaff.role}
                       onChange={(e) => setNewStaff({ ...newStaff, role: e.target.value })}
                     >
@@ -243,23 +252,27 @@ const Staffs = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              <Form.Group>
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
-                  value={newStaff.emailaddress}
-                  onChange={(e) => setNewStaff({ ...newStaff, emailaddress: e.target.value })}
-                />
-                {errors.emailaddress && <small className="text-danger">{errors.emailaddress}</small>}
-              </Form.Group>
+              <Row>
+                <Col>
+                  <Form.Group>
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={newStaff.emailaddress}
+                      onChange={(e) => setNewStaff({ ...newStaff, emailaddress: e.target.value })}
+                    />
+                    {errors.emailaddress && <small className="text-danger">{errors.emailaddress}</small>}
+                  </Form.Group>
+                </Col>
+              </Row>
             </Form>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={handleCloseModal}>
-              <FaTimes /> Cancel
+              <FaTimes /> Close
             </Button>
-            <Button variant="info" onClick={handleSaveNewStaff}>
-              <FaSave /> Add Staff
+            <Button variant="info" onClick={handleSaveStaff}>
+              <FaSave /> {isEdit ? "Update" : "Save"}
             </Button>
           </Modal.Footer>
         </Modal>
