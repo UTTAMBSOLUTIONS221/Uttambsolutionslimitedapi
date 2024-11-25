@@ -297,7 +297,7 @@ const RolePermissions = () => {
               <FaTimes /> Close
             </Button>
             <Button
-              variant="primary"
+              variant="info"
               onClick={editMode ? handleSaveUpdatedRole : handleSaveNewRole}
             >
               <FaSave /> {editMode ? 'Update' : 'Save'}

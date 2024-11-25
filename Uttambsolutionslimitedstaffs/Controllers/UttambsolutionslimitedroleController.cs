@@ -20,9 +20,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Uttambsolutionslimitedrole>> Get()
         {
-            var roles = _roleDbContext.Uttambsolutionslimitedroles.Include(r => r.Rolepermissions)
-                                                                 .ThenInclude(rp => rp.Permission)
-                                                                 .ToList();
+            var roles = _roleDbContext.Uttambsolutionslimitedroles;
             return Ok(roles);
         }
 
