@@ -12,6 +12,8 @@ namespace Uttambsolutionslimitedstaffs.Models
         public int Permissionid { get; set; }
         [Column("Permissionname")]
         public string? Permissionname { get; set; }
+        [Column("Permissionmodule")]
+        public string? Permissionmodule { get; set; }
         [Column("Permissionadmin")]
         public bool Permissionadmin { get; set; }
         [Column("Isactive")]
