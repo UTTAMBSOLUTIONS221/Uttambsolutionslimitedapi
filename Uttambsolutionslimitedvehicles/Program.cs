@@ -1,21 +1,27 @@
+using Microsoft.EntityFrameworkCore;
+using Uttambsolutionslimitedvehicles.DataContext;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+
+/* Database Context Dependency Injection */
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+var dbName = Environment.GetEnvironmentVariable("DB_NAME");
+var dbUsername = Environment.GetEnvironmentVariable("DB_SA_USERNAME");
+var dbPassword = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
+var connectionString = $"Data Source={dbHost};Initial Catalog={dbName};User ID={dbUsername};Password={dbPassword};Encrypt=True;TrustServerCertificate=True;";
+builder.Services.AddDbContext<UttambsolutionslimitedvehicleDbContext>(opt => opt.UseSqlServer(connectionString));
+/* ===================================== */
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+// Enable Swagger
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseAuthorization();
 
 app.MapControllers();
