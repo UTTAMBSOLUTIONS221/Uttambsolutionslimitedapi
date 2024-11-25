@@ -55,3 +55,9 @@ services:
     networks:
        - backend
        - frontend
+  uttambsolutionslimitedvehicles:
+    image: ${DOCKER_REGISTRY-}uttambsolutionslimitedvehicles
+    build:
+      context: Uttambsolutionslimitedvehicles
+      dockerfile: Dockerfile
+
