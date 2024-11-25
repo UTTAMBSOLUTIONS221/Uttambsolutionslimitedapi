@@ -18,9 +18,9 @@ namespace Uttambsolutionslimitedstaffs.Controllers
 
         // Get all roles
         [HttpGet]
-        public ActionResult<IEnumerable<Uttambsolutionslimitedrole>> GetRoles()
+        public ActionResult<IEnumerable<Uttambsolutionslimitedrole>> Get()
         {
-            var roles = _roleDbContext.Uttambsolutionslimitedroles.Include(r => r.RolePermissions)
+            var roles = _roleDbContext.Uttambsolutionslimitedroles.Include(r => r.Rolepermissions)
                                                                  .ThenInclude(rp => rp.Permission)
                                                                  .ToList();
             return Ok(roles);
@@ -28,12 +28,12 @@ namespace Uttambsolutionslimitedstaffs.Controllers
 
         // Get a role by ID, including its associated permissions
         [HttpGet("{Roleid:int}")]
-        public async Task<ActionResult<Uttambsolutionslimitedrole>> GetRoleById(int Roleid)
+        public async Task<ActionResult<Uttambsolutionslimitedrole>> Get(int Roleid)
         {
             var role = await _roleDbContext.Uttambsolutionslimitedroles
-                                           .Include(r => r.RolePermissions)
+                                           .Include(r => r.Rolepermissions)
                                            .ThenInclude(rp => rp.Permission)
-                                           .FirstOrDefaultAsync(r => r.RoleId == Roleid);
+                                           .FirstOrDefaultAsync(r => r.Roleid == Roleid);
 
             if (role == null)
             {
@@ -45,36 +45,36 @@ namespace Uttambsolutionslimitedstaffs.Controllers
 
         // Create a new role with associated permissions
         [HttpPost]
-        public async Task<ActionResult> CreateRole(Uttambsolutionslimitedrole role)
+        public async Task<ActionResult> Create(Uttambsolutionslimitedrole role)
         {
             // Add the role first
             await _roleDbContext.Uttambsolutionslimitedroles.AddAsync(role);
             await _roleDbContext.SaveChangesAsync();
 
             // Add the associated permissions
-            if (role.PermissionIds != null && role.PermissionIds.Count > 0)
+            if (role.Permissionids != null && role.Permissionids.Count > 0)
             {
                 foreach (var permissionId in role.PermissionIds)
                 {
-                    _roleDbContext.RolePermissions.Add(new RolePermission
+                    _roleDbContext.Rolepermissions.Add(new RolePermission
                     {
-                        RoleId = role.RoleId,
+                        RoleId = role.Roleid,
                         PermissionId = permissionId
                     });
                 }
                 await _roleDbContext.SaveChangesAsync();
             }
 
-            return CreatedAtAction(nameof(GetRoleById), new { Roleid = role.RoleId }, role);
+            return CreatedAtAction(nameof(Get), new { Roleid = role.Roleid }, role);
         }
 
         // Update an existing role, including its permissions
         [HttpPut("{Roleid:int}")]
-        public async Task<ActionResult> UpdateRole(int Roleid, Uttambsolutionslimitedrole role)
+        public async Task<ActionResult> Update(Uttambsolutionslimitedrole role)
         {
             var existingRole = await _roleDbContext.Uttambsolutionslimitedroles
-                                                    .Include(r => r.RolePermissions)
-                                                    .FirstOrDefaultAsync(r => r.RoleId == Roleid);
+                                                    .Include(r => r.Rolepermissions)
+                                                    .FirstOrDefaultAsync(r => r.Roleid == Roleid);
 
             if (existingRole == null)
             {
@@ -82,7 +82,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             }
 
             // Update the role properties
-            existingRole.RoleName = role.RoleName;
+            existingRole.RoleName = role.Rolename;
             _roleDbContext.Uttambsolutionslimitedroles.Update(existingRole);
 
             // Remove old permissions
@@ -93,7 +93,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             {
                 foreach (var permissionId in role.PermissionIds)
                 {
-                    _roleDbContext.RolePermissions.Add(new RolePermission
+                    _roleDbContext.RolePermissions.Add(new Rolepermission
                     {
                         RoleId = existingRole.RoleId,
                         PermissionId = permissionId
@@ -108,11 +108,11 @@ namespace Uttambsolutionslimitedstaffs.Controllers
 
         // Delete a role and its associated permissions
         [HttpDelete("{Roleid:int}")]
-        public async Task<ActionResult> DeleteRole(int Roleid)
+        public async Task<ActionResult> Delete(int Roleid)
         {
             var role = await _roleDbContext.Uttambsolutionslimitedroles
-                                           .Include(r => r.RolePermissions)
-                                           .FirstOrDefaultAsync(r => r.RoleId == Roleid);
+                                           .Include(r => r.Rolepermissions)
+                                           .FirstOrDefaultAsync(r => r.Roleid == Roleid);
 
             if (role == null)
             {
@@ -120,7 +120,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
             }
 
             // Remove the associated permissions
-            _roleDbContext.RolePermissions.RemoveRange(role.RolePermissions);
+            _roleDbContext.Rolepermissions.RemoveRange(role.Rolepermissions);
 
             // Remove the role
             _roleDbContext.Uttambsolutionslimitedroles.Remove(role);

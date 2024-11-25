@@ -16,7 +16,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Uttambsolutionslimitedpermission>> GetCustomers()
+        public ActionResult<IEnumerable<Uttambsolutionslimitedpermission>> Get()
         {
             return _permissionDbContext.Uttambsolutionslimitedpermissions;
         }
