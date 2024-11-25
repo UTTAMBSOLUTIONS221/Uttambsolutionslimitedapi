@@ -5,7 +5,7 @@ namespace Uttambsolutionslimitedvehicles.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UttambsolutionslimitedmodelController : ControllerBase
+    public class UttambsolutionslimitedvehiclemodelController : ControllerBase
     {
     }
 }

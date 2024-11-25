@@ -65,7 +65,7 @@
     //Staffs
     {
       "UpstreamPathTemplate": "/api/Uttambsolutionslimitedstaff",
-      "UpstreamHttpMethod": [ "GET","POST","PUT"],
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -77,7 +77,7 @@
     },
     {
       "UpstreamPathTemplate": "/api/Uttambsolutionslimitedstaff/{Staffid}",
-      "UpstreamHttpMethod": [ "GET","DELETE" ],
+      "UpstreamHttpMethod": [ "GET", "DELETE" ],
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -86,6 +86,31 @@
         }
       ],
       "DownstreamPathTemplate": "/api/Uttambsolutionslimitedstaff/{Staffid}"
+    },
+    //Vehicles
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedvehiclemake",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "uttambsolutionslimitedvehicles",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedvehiclemake"
+    },
+    {
+      "UpstreamPathTemplate": "/api/Uttambsolutionslimitedvehiclemake/{Vehiclemakeid}",
+      "UpstreamHttpMethod": [ "GET", "DELETE" ],
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "uttambsolutionslimitedvehicles",
+          "Port": 8080
+        }
+      ],
+      "DownstreamPathTemplate": "/api/Uttambsolutionslimitedvehiclemake/{Vehiclemakeid}"
     }
   ],
   "GlobalConfiguration": {

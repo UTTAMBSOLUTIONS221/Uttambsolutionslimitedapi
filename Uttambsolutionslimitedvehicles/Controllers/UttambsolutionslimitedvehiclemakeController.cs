@@ -6,11 +6,11 @@ namespace Uttambsolutionslimitedvehicles.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UttambsolutionslimitedmakeController : ControllerBase
+    public class UttambsolutionslimitedvehiclemakeController : ControllerBase
     {
         private readonly UttambsolutionslimitedvehicleDbContext _vehiclMakeDbContext;
 
-        public UttambsolutionslimitedmakeController(UttambsolutionslimitedvehicleDbContext vehiclMakeDbContext)
+        public UttambsolutionslimitedvehiclemakeController(UttambsolutionslimitedvehicleDbContext vehiclMakeDbContext)
         {
             _vehiclMakeDbContext = vehiclMakeDbContext;
         }
