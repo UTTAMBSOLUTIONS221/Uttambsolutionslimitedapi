@@ -226,7 +226,7 @@ const Staffs = () => {
             <Button variant="secondary" onClick={handleCloseModal}>
               <FaTimes /> Cancel
             </Button>
-            <Button variant="primary" onClick={handleSaveNewStaff}>
+            <Button variant="info" onClick={handleSaveNewStaff}>
               <FaSave /> Add Staff
             </Button>
           </Modal.Footer>
