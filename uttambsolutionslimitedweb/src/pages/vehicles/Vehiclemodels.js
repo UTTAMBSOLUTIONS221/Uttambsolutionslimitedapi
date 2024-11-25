@@ -106,7 +106,7 @@ const Vehiclemodels = () => {
 
   const handleSaveNewVehicleModel = async () => {
     if (!validateForm()) return;
-    const newVehicleModel = {
+    const vehicleModel = {
       vehiclemodelname:newVehicleModel.vehiclemodelname,
       vehiclemakeid:vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0, 
     };
@@ -117,7 +117,7 @@ const Vehiclemodels = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newVehicleModel),
+        body: JSON.stringify(vehicleModel),
       });
 
       if (response.ok) {
