@@ -100,10 +100,16 @@ const AdminLayout = () => {
                   </p>
                 </Link>
                 <ul className="nav nav-treeview">
-                <li className="nav-item main">
+                  <li className="nav-item main">
                     <Link to="/permissions" className="nav-link">
                       <i className="nav-icon fas fa-users" />
                       <p>Permissions</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item main">
+                    <Link to="/rolepermissions" className="nav-link">
+                      <i className="nav-icon fas fa-users" />
+                      <p>Role Permissions</p>
                     </Link>
                   </li>
                   <li className="nav-item main">
