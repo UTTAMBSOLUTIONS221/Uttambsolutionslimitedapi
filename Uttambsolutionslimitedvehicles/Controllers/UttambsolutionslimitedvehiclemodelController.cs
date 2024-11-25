@@ -60,6 +60,7 @@ namespace Uttambsolutionslimitedvehicles.Controllers
             return Ok();
         }
 
+
         // Update an existing model
         [HttpPut]
         public async Task<ActionResult> Update(Uttambsolutionslimitedvehiclemodel vehicleModel)
