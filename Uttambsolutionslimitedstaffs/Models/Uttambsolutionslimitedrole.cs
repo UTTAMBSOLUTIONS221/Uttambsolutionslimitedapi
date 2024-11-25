@@ -10,15 +10,23 @@ namespace Uttambsolutionslimitedstaffs.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("Roleid")]
         public int Roleid { get; set; }
+
         [Column("Rolename")]
         public string? Rolename { get; set; }
+
         [Column("Roledescription")]
         public string? Roledescription { get; set; }
+
         [Column("Isactive")]
         public bool Isactive { get; set; }
+
         [Column("Isdeleted")]
         public bool Isdeleted { get; set; }
+
         [Column("Isdefault")]
         public bool Isdefault { get; set; }
+
+        // Navigation property for the many-to-many relationship with permissions
+        public virtual ICollection<Uttambsolutionslimitedrolepermission>? Rolepermissions { get; set; }
     }
 }

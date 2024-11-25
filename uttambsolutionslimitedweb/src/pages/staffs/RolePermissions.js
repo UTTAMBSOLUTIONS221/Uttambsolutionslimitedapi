@@ -22,7 +22,7 @@ const RolePermissions = () => {
   useEffect(() => {
     const fetchPermissionsData = async () => {
       try {
-        const response = await fetch("http://localhost:8001/api/permissions");
+        const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedpermission");
         if (response.ok) {
           const data = await response.json();
           setPermissionsData(data);
