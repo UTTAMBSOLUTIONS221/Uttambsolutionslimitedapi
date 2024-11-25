@@ -10,6 +10,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import StartLayout from "./pages/shared/StartLayout";
 import AdminLayout from "./pages/shared/AdminLayout";
 import Staffs from "./pages/staffs/Staffs";
+import Permissions from "./pages/staffs/Permissions";
 import Vehiclemakes from "./pages/vehicles/Vehiclemakes";
 import Vehiclemodels from "./pages/vehicles/Vehiclemodels";
 import { AuthProvider } from "./context/AuthContext"; // Wrap the app with context
@@ -33,6 +34,7 @@ const App = () => {
               <Route path="/dashboard/profile" element={<Profile />} />
               <Route path="/dashboard/settings" element={<Settings />} />
               <Route path="/staffs" element={<Staffs />} />
+              <Route path="/permissions" element={<Permissions />} />
               <Route path="/vehiclemakes" element={<Vehiclemakes />} />
               <Route path="/vehiclemodels" element={<Vehiclemodels />} />
             </Route>

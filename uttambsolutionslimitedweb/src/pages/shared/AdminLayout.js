@@ -91,11 +91,34 @@ const AdminLayout = () => {
                   </li>
                 </ul>
               </li>
-              <li className="nav-item main">
-                <Link to="/staffs" className="nav-link">
-                  <i className="nav-icon fas fa-users" />
-                  <p>Staffs</p>
+              <li className="nav-item has-treeview main">
+                <Link className="nav-link">
+                  <i className="nav-icon fa fa-users" />
+                  <p>
+                    Staffs
+                    <i className="fa fa-angle-left right" />
+                  </p>
                 </Link>
+                <ul className="nav nav-treeview">
+                <li className="nav-item main">
+                    <Link to="/permissions" className="nav-link">
+                      <i className="nav-icon fas fa-users" />
+                      <p>Permissions</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item main">
+                    <Link to="/staffs" className="nav-link">
+                      <i className="nav-icon fas fa-users" />
+                      <p>Staffs</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item main">
+                    <Link to="/vehiclemodels" className="nav-link">
+                      <i className="nav-icon fas fa-list" />
+                      <p>Models</p>
+                    </Link>
+                  </li>
+                </ul>
               </li>
               <li className="nav-item has-treeview main">
                 <Link className="nav-link">
