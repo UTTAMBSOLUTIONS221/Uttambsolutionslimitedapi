@@ -13,6 +13,8 @@ const Permissions = () => {
     permissionadmin: false,  // Added isAdmin field
   });
   const [showModal, setShowModal] = useState(false);
+  const [editMode, setEditMode] = useState(false); // State to determine if we're editing
+  const [currentPermissionId, setCurrentPermissionId] = useState(null); // Store the ID of the permission being edited
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -48,22 +50,33 @@ const Permissions = () => {
           data: null,
           title: "Actions",
           orderable: false,
-          render: (data, type, row) => ` 
-            <button class="btn btn-info btn-xs">Edit</button>
-            <button class="btn btn-danger btn-xs">Delete</button>
-          `,
+          render: (data, type, row) => {
+            return ` 
+              <button class="btn btn-info btn-xs" data-id="${row.permissionid}">Edit</button>
+              <button class="btn btn-danger btn-xs" data-id="${row.permissionid}">Delete</button>
+            `;
+          },
+          createdCell: (cell, cellData, rowData) => {
+            // Add event listeners after rendering the table
+            $(cell).find(".btn-info").on("click", () => editPermission(rowData.permissionid));
+            $(cell).find(".btn-danger").on("click", () => deletePermission(rowData.permissionid));
+          },
         },
       ],
     });
   }, [permissionsData]);
 
-  const handleShowModal = () => setShowModal(true);
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleShowModal = () => {
+    setEditMode(false);  // Reset to add mode
     setNewPermission({
       permissionname: "",
-      permissionadmin: false, // Reset isAdmin checkbox
+      permissionadmin: false,
     });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
     setErrors({});
   };
 
@@ -88,23 +101,114 @@ const Permissions = () => {
 
       if (response.ok) {
         Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: 'Permission added successfully!',
-          });
-          handleCloseModal();
-          window.location.reload();
+          icon: 'success',
+          title: 'Success',
+          text: 'Permission added successfully!',
+        });
+        handleCloseModal();
+        window.location.reload();
       } else {
         Swal.fire({
-            icon: 'danger',
-            title: 'Warning',
-            text: 'Failed to save permission!',
-          });
-        const errorData = await response.json();
-        console.error(errorData.message || "Failed to save permission.");
+          icon: 'warning',
+          title: 'Failed to save permission!',
+        });
       }
     } catch (error) {
-      console.error("Error saving permission:", error.message);
+      console.error("Error saving permission:", error);
+    }
+  };
+
+  // Edit Permission Handler using GET
+  const editPermission = async (permissionId) => {
+    console.log(permissionId);
+    setEditMode(true); // Set editing mode
+    setCurrentPermissionId(permissionId); // Set the current permission ID
+
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedpermission/${permissionId}`);
+      if (response.ok) {
+        const permissionToEdit = await response.json();
+        setNewPermission({
+          permissionname: permissionToEdit.permissionname,
+          permissionadmin: permissionToEdit.permissionadmin,
+        });
+        setShowModal(true);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to fetch permission details!',
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching permission details:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error fetching permission details!',
+      });
+    }
+  };
+
+  const handleSaveUpdatedPermission = async () => {
+    if (!validateForm()) return;
+  
+    // Add the current permission ID to the updated permission object
+    const updatedPermission = { 
+      ...newPermission, 
+      permissionid: currentPermissionId // Ensure the correct ID is included
+    };
+  
+    try {
+      const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedpermission", {
+        method: "PUT", // Use PUT for updates
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPermission), // Send the updated permission object
+      });
+  
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Permission updated successfully!',
+        });
+        handleCloseModal();
+        window.location.reload();  // Refresh the page to reflect changes
+      } else {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Failed to update permission!',
+        });
+      }
+    } catch (error) {
+      console.error("Error updating permission:", error);
+    }
+  };
+  
+  // Delete Permission Handler (Assuming API delete endpoint)
+  const deletePermission = async (permissionId) => {
+    try {
+      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedpermission/${permissionId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Permission deleted successfully!',
+        });
+        window.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed to delete permission!',
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting permission:", error);
     }
   };
 
@@ -132,7 +236,7 @@ const Permissions = () => {
           className="modal-custom"
         >
           <Modal.Header closeButton className="modal-header-custom">
-            <Modal.Title>Add Permission</Modal.Title>
+            <Modal.Title>{editMode ? 'Edit Permission' : 'Add Permission'}</Modal.Title>
           </Modal.Header>
           <Modal.Body className="modal-body-custom">
             <Form>
@@ -167,8 +271,12 @@ const Permissions = () => {
             <Button variant="secondary" onClick={handleCloseModal} className="btn-custom">
               <FaTimes /> Cancel
             </Button>
-            <Button variant="info" onClick={handleSaveNewPermission} className="btn-custom">
-              <FaSave /> Add Permission
+            <Button
+              variant="info"
+              onClick={editMode ? handleSaveUpdatedPermission : handleSaveNewPermission}
+              className="btn-custom"
+            >
+              <FaSave /> {editMode ? 'Update Permission' : 'Add Permission'}
             </Button>
           </Modal.Footer>
         </Modal>
