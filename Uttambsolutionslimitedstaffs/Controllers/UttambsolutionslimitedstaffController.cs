@@ -110,6 +110,7 @@ namespace Uttambsolutionslimitedstaffs.Controllers
                 Lastname = staff.Lastname,
                 Emailaddress = staff.Emailaddress,
                 Phonenumber = staff.Phonenumber,
+                Roleid = role.Roleid,
                 Rolename = role.Rolename
             }
         )
