@@ -77,14 +77,16 @@ const Staffs = () => {
           render: (data, type, row) => {
             return ` 
               <div class="d-flex justify-content-end">
-                <button class="btn btn-info btn-xs" data-id="${row.staffid}">Edit</button>
+                <button class="btn btn-info btn-resend-staff-password btn-xs" data-id="${row.staffid}">Resend Password</button>
+                <button class="btn btn-info btn-edit-staff ml-2 btn-xs" data-id="${row.staffid}">Edit</button>
                 <button class="btn btn-danger btn-xs ml-2" data-id="${row.staffid}">Delete</button>
              </div>
             `;
           },
           createdCell: (cell, cellData, rowData) => {
             // Add event listeners after rendering the table
-            $(cell).find(".btn-info").on("click", () => editStaff(rowData.staffid));
+            $(cell).find(".btn-resend-staff-password").on("click", () => editStaff(rowData.staffid));
+            $(cell).find(".btn-edit-staff").on("click", () => editStaff(rowData.staffid));
             $(cell).find(".btn-danger").on("click", () => deleteStaff(rowData.staffid));
           },
         },
