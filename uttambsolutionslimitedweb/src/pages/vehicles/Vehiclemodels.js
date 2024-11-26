@@ -3,7 +3,7 @@ import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
 import Swal from 'sweetalert2';
-import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import { Modal, Button, Form, Row, Col, Spinner } from "react-bootstrap";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Vehiclemodels = () => {
@@ -11,12 +11,13 @@ const Vehiclemodels = () => {
   const [vehicleMakes, setVehicleMakes] = useState([]);
   const [newVehicleModel, setNewVehicleModel] = useState({
     vehiclemodelname: "",
-    vehiclemakeid:0
+    vehiclemakeid: 0
   });
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false); // State to determine if we're editing
   const [currentVehicleModelId, setCurrentVehicleModelId] = useState(null); // Store the ID of the permission being edited
   const [errors, setErrors] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false); // State to track processing status
 
   useEffect(() => {
     // Fetch vehicle Models data
@@ -33,6 +34,8 @@ const Vehiclemodels = () => {
         console.error("Error fetching vehicle Models data:", error);
       }
     };
+
+    // Fetch vehicle Makes
     const fetchVehicleMakes = async () => {
       try {
         const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemake");
@@ -65,7 +68,7 @@ const Vehiclemodels = () => {
           data: null,
           title: "Actions",
           orderable: false,
-          className: "text-right",  
+          className: "text-right",
           render: (data, type, row) => {
             return ` 
               <div class="d-flex justify-content-end">
@@ -88,7 +91,7 @@ const Vehiclemodels = () => {
     setEditMode(false);  // Reset to add mode
     setNewVehicleModel({
         vehiclemodelname: "",
-        vehiclemakeid:0
+        vehiclemakeid: 0
     });
     setShowModal(true);
   };
@@ -107,11 +110,12 @@ const Vehiclemodels = () => {
 
   const handleSaveNewVehicleModel = async () => {
     if (!validateForm()) return;
+    setIsProcessing(true); // Start processing
     const vehicleModel = {
-      vehiclemodelname:newVehicleModel.vehiclemodelname,
-      vehiclemakeid:vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0, 
+      vehiclemodelname: newVehicleModel.vehiclemodelname,
+      vehiclemakeid: vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0,
     };
-    
+
     try {
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
         method: "POST",
@@ -137,12 +141,13 @@ const Vehiclemodels = () => {
       }
     } catch (error) {
       console.error("Error saving vehicle model:", error);
+    } finally {
+      setIsProcessing(false); // End processing
     }
   };
 
   // Edit Permission Handler using GET
   const editVehicleModel = async (vehiclemodelId) => {
-    console.log(vehiclemodelId);
     setEditMode(true); // Set editing mode
     setCurrentVehicleModelId(vehiclemodelId); // Set the current permission ID
 
@@ -174,23 +179,23 @@ const Vehiclemodels = () => {
 
   const handleSaveUpdatedVehicleModel = async () => {
     if (!validateForm()) return;
-  
-    // Add the current permission ID to the updated permission object
-    const updatedVehicleModel = { 
-      ...newVehicleModel, 
+
+    setIsProcessing(true); // Start processing
+    const updatedVehicleModel = {
+      ...newVehicleModel,
       vehiclemodelid: currentVehicleModelId,
-      vehiclemakeid:vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0, 
+      vehiclemakeid: vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0,
     };
-  
+
     try {
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
         method: "PUT", // Use PUT for updates
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updatedVehicleModel), // Send the updated permission object
+        body: JSON.stringify(updatedVehicleModel),
       });
-  
+
       if (response.ok) {
         Swal.fire({
           icon: 'success',
@@ -207,10 +212,12 @@ const Vehiclemodels = () => {
       }
     } catch (error) {
       console.error("Error updating vehicle model:", error);
+    } finally {
+      setIsProcessing(false); // End processing
     }
   };
-  
-  // Delete Permission Handler (Assuming API delete endpoint)
+
+  // Delete Permission Handler
   const deleteVehicleModel = async (vehiclemodelId) => {
     try {
       const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel/${vehiclemodelId}`, {
@@ -261,53 +268,63 @@ const Vehiclemodels = () => {
           <Modal.Header closeButton className="modal-header-custom">
             <Modal.Title>{editMode ? 'Edit Model' : 'Add Model'}</Modal.Title>
           </Modal.Header>
-          <Modal.Body className="modal-body-custom">
+          <Modal.Body>
             <Form>
-              <Row className="mb-3">
-              <Col xs={12} sm={6}>
-                  <Form.Group>
+              <Row>
+                <Col>
+                  <Form.Group controlId="vehiclemakeid">
                     <Form.Label>Vehicle Make</Form.Label>
                     <Form.Control
                       as="select"
-                      className="content-justify-center"
                       value={newVehicleModel.vehicleMake}
                       onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })}
                     >
-                      <option value="">Select Vehicle Make</option>
+                      <option value="">Select Make</option>
                       {vehicleMakes.map((vehicleMake) => (
                         <option key={vehicleMake.vehiclemakeid} value={vehicleMake.vehiclemakename}>
                           {vehicleMake.vehiclemakename}
                         </option>
                       ))}
                     </Form.Control>
-                    {errors.vehicleMake && <small className="text-danger">{errors.vehicleMake}</small>}
+                    {errors.vehiclemakeid && <span className="text-danger">{errors.vehiclemakeid}</span>}
                   </Form.Group>
-                  </Col>
-                  <Col xs={12} sm={6}>
-                    <Form.Group>
-                      <Form.Label className="form-label-custom">Model Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={newVehicleModel.vehiclemodelname}
-                        onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })}
-                        className="form-control-custom"
-                      />
-                      {errors.vehiclemodelname && <small className="text-danger">{errors.vehiclemodelname}</small>}
-                    </Form.Group>
-                  </Col>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <Form.Group controlId="vehiclemodelname">
+                    <Form.Label>Vehicle Model Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={newVehicleModel.vehiclemodelname}
+                      onChange={(e) =>
+                        setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })
+                      }
+                      isInvalid={!!errors.vehiclemodelname}
+                    />
+                    {errors.vehiclemodelname && (
+                      <Form.Control.Feedback type="invalid">{errors.vehiclemodelname}</Form.Control.Feedback>
+                    )}
+                  </Form.Group>
+                </Col>
               </Row>
             </Form>
           </Modal.Body>
-          <Modal.Footer className="modal-footer-custom">
-            <Button variant="secondary" onClick={handleCloseModal} className="btn-custom">
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseModal}>
               <FaTimes /> Cancel
             </Button>
             <Button
               variant="info"
               onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel}
-              className="btn-custom"
+              disabled={isProcessing} // Disable button during processing
             >
-              <FaSave /> {editMode ? 'Update Vehicle Model' : 'Add Vehicle Model'}
+              {isProcessing ? (
+                <Spinner animation="border" size="sm" className="mr-2" />
+              ) : (
+                <FaSave />
+              )}
+              {editMode ? 'Save Changes' : 'Save Model'}
             </Button>
           </Modal.Footer>
         </Modal>
