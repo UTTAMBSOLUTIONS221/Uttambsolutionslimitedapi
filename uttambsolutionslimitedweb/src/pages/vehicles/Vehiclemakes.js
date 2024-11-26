@@ -3,7 +3,7 @@ import $ from "jquery";
 import "datatables.net-bs4";
 import "datatables.net-bs4/css/dataTables.bootstrap4.css";
 import Swal from 'sweetalert2';
-import { Modal, Button, Form, Row } from "react-bootstrap";
+import { Modal, Button, Form, Row, Spinner } from "react-bootstrap";
 import { FaPlus, FaSave, FaTimes } from "react-icons/fa"; // FontAwesome icons for buttons
 
 const Vehiclemakes = () => {
@@ -15,6 +15,7 @@ const Vehiclemakes = () => {
   const [editMode, setEditMode] = useState(false); // State to determine if we're editing
   const [currentVehicleMakeId, setCurrentVehicleMakeId] = useState(null); // Store the ID of the permission being edited
   const [errors, setErrors] = useState({});
+  const [isProcessing, setIsProcessing] = useState(false); // State to track processing status
 
   useEffect(() => {
     // Fetch vehicle makes data
@@ -90,6 +91,8 @@ const Vehiclemakes = () => {
   const handleSaveNewVehicleMake = async () => {
     if (!validateForm()) return;
 
+    setIsProcessing(true); // Set processing to true
+
     try {
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemake", {
         method: "POST",
@@ -115,6 +118,8 @@ const Vehiclemakes = () => {
       }
     } catch (error) {
       console.error("Error saving vehicle make:", error);
+    } finally {
+      setIsProcessing(false); // Reset processing state
     }
   };
 
@@ -151,6 +156,8 @@ const Vehiclemakes = () => {
 
   const handleSaveUpdatedVehicleMake = async () => {
     if (!validateForm()) return;
+
+    setIsProcessing(true); // Set processing to true
   
     // Add the current permission ID to the updated permission object
     const updatedVehicleMake = { 
@@ -183,11 +190,15 @@ const Vehiclemakes = () => {
       }
     } catch (error) {
       console.error("Error updating vehicle make:", error);
+    } finally {
+      setIsProcessing(false); // Reset processing state
     }
   };
   
   // Delete Permission Handler (Assuming API delete endpoint)
   const deleteVehicleMake = async (vehiclemakeId) => {
+    setIsProcessing(true); // Set processing to true
+
     try {
       const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemake/${vehiclemakeId}`, {
         method: "DELETE",
@@ -208,6 +219,8 @@ const Vehiclemakes = () => {
       }
     } catch (error) {
       console.error("Error deleting vehicle make:", error);
+    } finally {
+      setIsProcessing(false); // Reset processing state
     }
   };
 
@@ -240,16 +253,16 @@ const Vehiclemakes = () => {
           <Modal.Body className="modal-body-custom">
             <Form>
               <Row className="mb-3">
-              <Form.Group>
-                    <Form.Label className="form-label-custom">Make Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={newVehicleMake.vehiclemakename}
-                      onChange={(e) => setNewVehicleMake({ ...newVehicleMake, vehiclemakename: e.target.value })}
-                      className="form-control-custom"
-                    />
-                    {errors.vehiclemakename && <small className="text-danger">{errors.vehiclemakename}</small>}
-                  </Form.Group>
+                <Form.Group>
+                  <Form.Label className="form-label-custom">Make Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newVehicleMake.vehiclemakename}
+                    onChange={(e) => setNewVehicleMake({ ...newVehicleMake, vehiclemakename: e.target.value })}
+                    className="form-control-custom"
+                  />
+                  {errors.vehiclemakename && <small className="text-danger">{errors.vehiclemakename}</small>}
+                </Form.Group>
               </Row>
             </Form>
           </Modal.Body>
@@ -261,8 +274,10 @@ const Vehiclemakes = () => {
               variant="info"
               onClick={editMode ? handleSaveUpdatedVehicleMake : handleSaveNewVehicleMake}
               className="btn-custom"
+              disabled={isProcessing}
             >
-              <FaSave /> {editMode ? 'Update Vehicle Make' : 'Add Vehicle Make'}
+              {isProcessing ? <Spinner animation="border" size="sm" /> : <FaSave />}
+              {isProcessing ? 'Processing...' : editMode ? 'Save Changes' : 'Save Make'}
             </Button>
           </Modal.Footer>
         </Modal>
