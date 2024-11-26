@@ -302,77 +302,85 @@ const Vehiclemodels = () => {
           </div>
       </div>
 
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>{editMode ? "Edit Vehicle Model" : "Add Vehicle Model"}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group as={Row} controlId="vehicleModelName">
-              <Form.Label column sm="3">Model Name</Form.Label>
-              <Col sm="9">
-                <Form.Control
-                  type="text"
-                  placeholder="Enter Vehicle Model Name"
-                  value={newVehicleModel.vehiclemodelname}
-                  onChange={(e) =>
-                    setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })
-                  }
-                  isInvalid={errors.vehiclemodelname}
-                />
-                <Form.Control.Feedback type="invalid">
-                  {errors.vehiclemodelname}
-                </Form.Control.Feedback>
-              </Col>
-            </Form.Group>
+      <Modal
+  show={showModal}
+  onHide={handleCloseModal}
+  backdrop="static"
+  keyboard={false}
+  centered
+  className="modal-custom"
+>
+  <Modal.Header closeButton>
+    <Modal.Title>{editMode ? "Edit Vehicle Model" : "Add Vehicle Model"}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      {/* Model Name and Make in the same row with labels on top */}
+      <Form.Group as={Row} controlId="vehicleModelName">
+        <Col sm="6">
+          <Form.Label>Model Name</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter Vehicle Model Name"
+            value={newVehicleModel.vehiclemodelname}
+            onChange={(e) =>
+              setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })
+            }
+            isInvalid={errors.vehiclemodelname}
+          />
+          <Form.Control.Feedback type="invalid">
+            {errors.vehiclemodelname}
+          </Form.Control.Feedback>
+        </Col>
 
-            <Form.Group as={Row} controlId="vehicleMake">
-              <Form.Label column sm="3">Make</Form.Label>
-              <Col sm="9">
-                <Form.Control
-                  as="select"
-                  value={newVehicleModel.vehicleMake}
-                  onChange={(e) =>
-                    setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })
-                  }
-                >
-                  <option value="">Select Vehicle Make</option>
-                  {vehicleMakes.map((make) => (
-                    <option key={make.vehiclemakeid} value={make.vehiclemakename}>
-                      {make.vehiclemakename}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Col>
-            </Form.Group>
+        <Col sm="6">
+          <Form.Label>Make</Form.Label>
+          <Form.Control
+            as="select"
+            value={newVehicleModel.vehicleMake}
+            onChange={(e) =>
+              setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })
+            }
+          >
+            <option value="">Select Vehicle Make</option>
+            {vehicleMakes.map((make) => (
+              <option key={make.vehiclemakeid} value={make.vehiclemakename}>
+                {make.vehiclemakename}
+              </option>
+            ))}
+          </Form.Control>
+        </Col>
+      </Form.Group>
 
-            <Form.Group as={Row}>
-              <Form.Label column sm="3">Vehicle Image</Form.Label>
-              <Col sm="9">
-                <Form.Control
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-                {imagePreview && (
-                  <div className="mt-3">
-                    <img src={imagePreview} alt="Preview" width="100" height="100" />
-                  </div>
-                )}
-              </Col>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            <FaTimes /> Cancel
-          </Button>
-          <Button variant="primary" onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel} disabled={isProcessing}>
-            {isProcessing ? <Spinner as="span" animation="border" size="sm" /> : <FaSave />}
-            {editMode ? "Save Changes" : "Save Vehicle Model"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Vehicle Image picker in the same row with label on top and input below */}
+      <Form.Group as={Row} controlId="vehicleImage">
+        <Col sm="12">
+          <Form.Label>Vehicle Image</Form.Label>
+          <Form.Control
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          {imagePreview && (
+            <div className="mt-3">
+              <img src={imagePreview} alt="Preview" width="100" height="100" />
+            </div>
+          )}
+        </Col>
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      <FaTimes /> Cancel
+    </Button>
+    <Button variant="info" onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel} disabled={isProcessing}>
+      {isProcessing ? <Spinner as="span" animation="border" size="sm" /> : <FaSave />}
+      {editMode ? "Save Changes" : "Save Vehicle Model"}
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </>
   );
 };
