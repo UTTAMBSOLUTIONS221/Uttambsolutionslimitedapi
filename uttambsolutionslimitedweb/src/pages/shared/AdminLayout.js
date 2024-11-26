@@ -141,6 +141,12 @@ const AdminLayout = () => {
                       <p>Models</p>
                     </Link>
                   </li>
+                  <li className="nav-item main">
+                    <Link to="/vehiclepricelist" className="nav-link">
+                      <i className="nav-icon fas fa-list" />
+                      <p>Price List</p>
+                    </Link>
+                  </li>
                 </ul>
               </li>
               

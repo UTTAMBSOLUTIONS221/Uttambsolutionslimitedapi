@@ -14,6 +14,7 @@ import RolePermissions from "./pages/staffs/RolePermissions";
 import Staffs from "./pages/staffs/Staffs";
 import Vehiclemakes from "./pages/vehicles/Vehiclemakes";
 import Vehiclemodels from "./pages/vehicles/Vehiclemodels";
+import Vehiclepricelist from "./pages/vehicles/Vehiclepricelist";
 import { AuthProvider } from "./context/AuthContext"; // Wrap the app with context
 import "./App.css";
 
@@ -40,6 +41,7 @@ const App = () => {
              
               <Route path="/vehiclemakes" element={<Vehiclemakes />} />
               <Route path="/vehiclemodels" element={<Vehiclemodels />} />
+              <Route path="/vehiclepricelist" element={<Vehiclepricelist />} />
             </Route>
           </Route>
         </Routes>
