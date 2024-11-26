@@ -11,13 +11,15 @@ const Vehiclemodels = () => {
   const [vehicleMakes, setVehicleMakes] = useState([]);
   const [newVehicleModel, setNewVehicleModel] = useState({
     vehiclemodelname: "",
-    vehiclemakeid: 0
+    vehiclemakeid: 0,
+    vehicleimage: null, // Add an image field
   });
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false); // State to determine if we're editing
   const [currentVehicleModelId, setCurrentVehicleModelId] = useState(null); // Store the ID of the permission being edited
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false); // State to track processing status
+  const [imagePreview, setImagePreview] = useState(null); // State to store image preview
 
   useEffect(() => {
     // Fetch vehicle Models data
@@ -65,6 +67,13 @@ const Vehiclemodels = () => {
         { data: "vehiclemakename", title: "Make Name" },
         { data: "vehiclemodelname", title: "Model Name" },
         {
+          data: "vehicleimage", // Column to display the image
+          title: "Image",
+          render: (data) => {
+            return `<img src="${data}" alt="Vehicle Image" width="50" height="50" />`;
+          },
+        },
+        {
           data: null,
           title: "Actions",
           orderable: false,
@@ -91,8 +100,10 @@ const Vehiclemodels = () => {
     setEditMode(false);  // Reset to add mode
     setNewVehicleModel({
         vehiclemodelname: "",
-        vehiclemakeid: 0
+        vehiclemakeid: 0,
+        vehicleimage: null,
     });
+    setImagePreview(null); // Reset image preview
     setShowModal(true);
   };
 
@@ -108,21 +119,37 @@ const Vehiclemodels = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewVehicleModel({ ...newVehicleModel, vehicleimage: file });
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveNewVehicleModel = async () => {
     if (!validateForm()) return;
     setIsProcessing(true); // Start processing
+
     const vehicleModel = {
       vehiclemodelname: newVehicleModel.vehiclemodelname,
       vehiclemakeid: vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakename === newVehicleModel.vehicleMake)?.vehiclemakeid || 0,
+      vehicleimage: imagePreview, // Add image to payload
     };
 
     try {
+      const formData = new FormData();
+      formData.append('vehiclemodelname', vehicleModel.vehiclemodelname);
+      formData.append('vehiclemakeid', vehicleModel.vehiclemakeid);
+      if (newVehicleModel.vehicleimage) {
+        formData.append('vehicleimage', newVehicleModel.vehicleimage); // Append image file
+      }
+
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(vehicleModel),
+        body: formData,
       });
 
       if (response.ok) {
@@ -158,7 +185,9 @@ const Vehiclemodels = () => {
         setNewVehicleModel({
             vehiclemodelname: vehicleModelToEdit.vehiclemodelname,
             vehicleMake: vehicleMakes.find((vehicleMakeObj) => vehicleMakeObj.vehiclemakeid === vehicleModelToEdit.vehiclemakeid)?.vehiclemakename || "",
+            vehicleimage: vehicleModelToEdit.vehicleimage || null, // Set image if exists
         });
+        setImagePreview(vehicleModelToEdit.vehicleimage || null); // Set image preview if exists
         setShowModal(true);
       } else {
         Swal.fire({
@@ -188,12 +217,17 @@ const Vehiclemodels = () => {
     };
 
     try {
+      const formData = new FormData();
+      formData.append('vehiclemodelid', updatedVehicleModel.vehiclemodelid);
+      formData.append('vehiclemodelname', updatedVehicleModel.vehiclemodelname);
+      formData.append('vehiclemakeid', updatedVehicleModel.vehiclemakeid);
+      if (newVehicleModel.vehicleimage) {
+        formData.append('vehicleimage', newVehicleModel.vehicleimage); // Append image file if new one
+      }
+
       const response = await fetch("http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel", {
         method: "PUT", // Use PUT for updates
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedVehicleModel),
+        body: formData,
       });
 
       if (response.ok) {
@@ -203,7 +237,7 @@ const Vehiclemodels = () => {
           text: 'Vehicle model updated successfully!',
         });
         handleCloseModal();
-        window.location.reload();  // Refresh the page to reflect changes
+        window.location.reload();
       } else {
         Swal.fire({
           icon: 'warning',
@@ -217,119 +251,129 @@ const Vehiclemodels = () => {
     }
   };
 
-  // Delete Permission Handler
+  // Delete Vehicle Model Handler
   const deleteVehicleModel = async (vehiclemodelId) => {
-    try {
-      const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel/${vehiclemodelId}`, {
-        method: "DELETE",
-      });
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch(`http://localhost:8001/api/Uttambsolutionslimitedvehiclemodel/${vehiclemodelId}`, {
+            method: "DELETE",
+          });
 
-      if (response.ok) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: 'Vehicle model deleted successfully!',
-        });
-        window.location.reload();
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Failed to delete vehicle model!',
-        });
+          if (response.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Deleted',
+              text: 'Vehicle model has been deleted.',
+            });
+            window.location.reload();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Failed to delete vehicle model!',
+            });
+          }
+        } catch (error) {
+          console.error("Error deleting vehicle model:", error);
+        }
       }
-    } catch (error) {
-      console.error("Error deleting vehicle model:", error);
-    }
+    });
   };
 
   return (
-    <div>
+    <>
       <div className="card card-outline card-info">
         <div className="card-header">
-          <h4 className="card-title">Vehicle Models</h4>
-          <Button className="float-right btn-info btn-sm" onClick={handleShowModal}>
-            <FaPlus /> Add Model
-          </Button>
-        </div>
-        <div className="card-body">
-          <table id="vehicleModelTable" className="table table-bordered table-striped table-sm"></table>
-        </div>
+            <h4 className="card-title">Vehicle Models</h4>
+            <Button className="float-right btn-info btn-sm" onClick={handleShowModal}>
+              <FaPlus /> Add Model
+            </Button>
+          </div>
+          <div className="card-body">
+            <table id="vehicleModelTable" className="table table-bordered table-striped table-sm"></table>
+          </div>
       </div>
 
-      {showModal && (
-        <Modal
-          show={showModal}
-          onHide={handleCloseModal}
-          backdrop="static"
-          keyboard={false}
-          centered
-          className="modal-custom"
-        >
-          <Modal.Header closeButton className="modal-header-custom">
-            <Modal.Title>{editMode ? 'Edit Model' : 'Add Model'}</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <Form>
-              <Row>
-                <Col>
-                  <Form.Group controlId="vehiclemakeid">
-                    <Form.Label>Vehicle Make</Form.Label>
-                    <Form.Control
-                      as="select"
-                      value={newVehicleModel.vehicleMake}
-                      onChange={(e) => setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })}
-                    >
-                      <option value="">Select Make</option>
-                      {vehicleMakes.map((vehicleMake) => (
-                        <option key={vehicleMake.vehiclemakeid} value={vehicleMake.vehiclemakename}>
-                          {vehicleMake.vehiclemakename}
-                        </option>
-                      ))}
-                    </Form.Control>
-                    {errors.vehiclemakeid && <span className="text-danger">{errors.vehiclemakeid}</span>}
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <Form.Group controlId="vehiclemodelname">
-                    <Form.Label>Vehicle Model Name</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={newVehicleModel.vehiclemodelname}
-                      onChange={(e) =>
-                        setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })
-                      }
-                      isInvalid={!!errors.vehiclemodelname}
-                    />
-                    {errors.vehiclemodelname && (
-                      <Form.Control.Feedback type="invalid">{errors.vehiclemodelname}</Form.Control.Feedback>
-                    )}
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseModal}>
-              <FaTimes /> Cancel
-            </Button>
-            <Button
-              variant="info"
-              onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel}
-              disabled={isProcessing} // Disable button during processing
-            >
-              {isProcessing ? (
-                <Spinner animation="border" size="sm" className="mr-2" />
-              ) : (
-                <FaSave />
-              )}
-              {editMode ? 'Save Changes' : 'Save Model'}
-            </Button>
-          </Modal.Footer>
-        </Modal>
-      )}
-    </div>
+      <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editMode ? "Edit Vehicle Model" : "Add Vehicle Model"}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group as={Row} controlId="vehicleModelName">
+              <Form.Label column sm="3">Model Name</Form.Label>
+              <Col sm="9">
+                <Form.Control
+                  type="text"
+                  placeholder="Enter Vehicle Model Name"
+                  value={newVehicleModel.vehiclemodelname}
+                  onChange={(e) =>
+                    setNewVehicleModel({ ...newVehicleModel, vehiclemodelname: e.target.value })
+                  }
+                  isInvalid={errors.vehiclemodelname}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.vehiclemodelname}
+                </Form.Control.Feedback>
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} controlId="vehicleMake">
+              <Form.Label column sm="3">Make</Form.Label>
+              <Col sm="9">
+                <Form.Control
+                  as="select"
+                  value={newVehicleModel.vehicleMake}
+                  onChange={(e) =>
+                    setNewVehicleModel({ ...newVehicleModel, vehicleMake: e.target.value })
+                  }
+                >
+                  <option value="">Select Vehicle Make</option>
+                  {vehicleMakes.map((make) => (
+                    <option key={make.vehiclemakeid} value={make.vehiclemakename}>
+                      {make.vehiclemakename}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row}>
+              <Form.Label column sm="3">Vehicle Image</Form.Label>
+              <Col sm="9">
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {imagePreview && (
+                  <div className="mt-3">
+                    <img src={imagePreview} alt="Preview" width="100" height="100" />
+                  </div>
+                )}
+              </Col>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            <FaTimes /> Cancel
+          </Button>
+          <Button variant="primary" onClick={editMode ? handleSaveUpdatedVehicleModel : handleSaveNewVehicleModel} disabled={isProcessing}>
+            {isProcessing ? <Spinner as="span" animation="border" size="sm" /> : <FaSave />}
+            {editMode ? "Save Changes" : "Save Vehicle Model"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 
